@@ -14,7 +14,7 @@ X Return probes to Worker Manager when done  / Scout Map
 
 
 
-**Air Rush:**
+**Air Rush:**  
 X implement hard-coded build order for cannons + 2 stargates  
   _ Try to implement logic to have the stargates not visible.. Right now they are spiral  
   _ Add in air offense upgrade, we can afford it  
