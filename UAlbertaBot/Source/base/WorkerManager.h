@@ -33,6 +33,7 @@ public:
 	void						handleMoveWorkers();
 	void						handleCombatWorkers();
 	void						finishedWithCombatWorkers();
+	void						finishedWithScoutWorker(BWAPI::Unit * unit); 
 
 	void						drawResourceDebugInfo();
 	void						updateWorkerStatus();

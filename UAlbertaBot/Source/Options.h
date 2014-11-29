@@ -46,7 +46,8 @@ namespace Options
 
 	namespace FileIO
 	{
-		extern const char * FILE_SETTINGS;				
+		extern std::string WRITE_DIR;	
+		extern std::string READ_DIR;	
 	}
 
 	namespace Debug
@@ -75,5 +76,11 @@ namespace Options
 	namespace Tools
 	{
 		extern int MAP_GRID_SIZE;
+	}
+
+	namespace Macro
+	{
+		extern int SCOUT_RUSH_COUNT;
+		extern int DEFAULT_STRATEGY;
 	}
 }

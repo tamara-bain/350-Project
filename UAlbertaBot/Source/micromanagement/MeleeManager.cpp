@@ -93,6 +93,15 @@ int MeleeManager::getAttackPriority(BWAPI::Unit * unit)
 {
 	BWAPI::UnitType type = unit->getType();
 
+    if (unit->isRepairing())
+        return 11;
+
+
+
+
+
+
+
 	// highest priority is something that can attack us or aid in combat
 	if (type == BWAPI::UnitTypes::Terran_Medic || 
 		(type.groundWeapon() != BWAPI::WeaponTypes::None && !type.isWorker()) || 

@@ -9,6 +9,7 @@
 #include "base/BuildingManager.h"
 #include "ScoutManager.h"
 #include "StrategyManager.h"
+#include "ScoutRushManager.h"
 
 #include "..\..\StarcraftBuildOrderSearch\Source\starcraftsearch\Timer.hpp"
 
@@ -94,6 +95,7 @@ class GameCommander
 {
 	CombatCommander		combatCommander;
 	ScoutManager		scoutManager;
+	ScoutRushManager    scoutRushManager;
 	TimerManager		timerManager;
 
 	std::set<BWAPI::Unit *> combatUnits;
@@ -103,7 +105,6 @@ class GameCommander
 	std::set<BWAPI::Unit *>	validUnits;
 	std::set<BWAPI::Unit *> assignedUnits;
 
-	BWAPI::Unit * currentScout;
 	int numWorkerScouts;
 
 	const bool isAssigned(BWAPI::Unit * unit) const;
@@ -118,6 +119,7 @@ public:
 	void populateUnitVectors();
 	void setValidUnits();
 	void setScoutUnits();
+	void setScoutRushUnits();
 	void setWorkerUnits();
 	void setCombatUnits();
 
@@ -129,6 +131,7 @@ public:
 	BWAPI::Unit * getFirstSupplyProvider();
 	BWAPI::Unit * getClosestUnitToTarget(BWAPI::UnitType type, BWAPI::Position target);
 	BWAPI::Unit * getClosestWorkerToTarget(BWAPI::Position target);
+	BWAPI::Unit * GameCommander::getMineralWorker();
 
 	void onUnitShow(BWAPI::Unit * unit);
 	void onUnitHide(BWAPI::Unit * unit);

@@ -24,8 +24,6 @@ class StrategyManager
 	std::vector<std::string>	terranOpeningBook;
 	std::vector<std::string>	zergOpeningBook;
 
-	std::string					readDir;
-	std::string					writeDir;
 	std::vector<IntPair>		results;
 	std::vector<int>			usableStrategies;
 	int							currentStrategy;
@@ -65,7 +63,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossZealotRush=0, ProtossDarkTemplar=1, ProtossDragoons=2, NumProtossStrategies=3 };
+	enum { ProtossProbeRush=0, ProtossZealotRush=1, ProtossDarkTemplar=2, ProtossDragoons=3, NumProtossStrategies=4 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 

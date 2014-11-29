@@ -59,6 +59,9 @@
     <CodeAnalysisIgnoreGeneratedCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CodeAnalysisIgnoreGeneratedCode>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <TargetName>HelloKittyBot</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -141,6 +144,7 @@
     <ClCompile Include="..\Source\Options.cpp" />
     <ClCompile Include="..\Source\ReplayVisualizer.cpp" />
     <ClCompile Include="..\Source\ScoutManager.cpp" />
+    <ClCompile Include="..\Source\ScoutRushManager.cpp" />
     <ClCompile Include="..\Source\Squad.cpp" />
     <ClCompile Include="..\Source\SquadData.cpp" />
     <ClCompile Include="..\Source\StrategyManager.cpp" />
@@ -185,6 +189,7 @@
     <ClInclude Include="..\Source\Options.h" />
     <ClInclude Include="..\Source\ReplayVisualizer.h" />
     <ClInclude Include="..\Source\ScoutManager.h" />
+    <ClInclude Include="..\Source\ScoutRushManager.h" />
     <ClInclude Include="..\Source\Squad.h" />
     <ClInclude Include="..\Source\SquadData.h" />
     <ClInclude Include="..\Source\SquadOrder.h" />

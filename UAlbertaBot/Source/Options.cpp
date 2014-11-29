@@ -1,4 +1,5 @@
 #include "Options.h"
+#include "StrategyManager.h"
 
 namespace Options
 {
@@ -129,7 +130,8 @@ namespace Options
 
 	namespace FileIO							// settings for file read/write
 	{
-		extern const char * FILE_SETTINGS		= "file_settings.txt";
+		extern std::string WRITE_DIR		= "bwapi-data/write/";
+		extern std::string READ_DIR			= "bwapi-data/read/";
 	}
 
 	namespace Debug								// debugging options
@@ -158,5 +160,11 @@ namespace Options
 	namespace Tools								// options for various tools
 	{
 		extern int MAP_GRID_SIZE				= 320;		// size of grid spacing in MapGrid
+	}
+
+	namespace Macro								// options for macro strategies
+	{
+		extern int SCOUT_RUSH_COUNT				= 4;		// number of scouts when using the rush strategy
+        extern int DEFAULT_STRATEGY				= StrategyManager::ProtossZealotRush;		// default strategy to use when not using fileio
 	}
 }

@@ -60,6 +60,7 @@ public:
 	BWAPI::TilePosition getNextExpansion();
 
 	void update();
+    void drawMapData(); 
 	void drawMyRegion();
 	void computeConnectedRegions();
 

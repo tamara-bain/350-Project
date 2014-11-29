@@ -84,19 +84,8 @@ void MapTools::update()
 	if (nextExp != BWAPI::TilePositions::None)
 	{
 		BWAPI::Position exp = BWAPI::Position(getNextExpansion());
-		if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawBoxMap(exp.x(), exp.y(), exp.x()+4*32, exp.y()+3*32, BWAPI::Colors::Green, true);
+		if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawBoxMap(exp.x(), exp.y(), exp.x()+4*32, exp.y()+3*32, BWAPI::Colors::Green, false);
 	}
-
-	// draws distance map to screen
-	/*for (int x=0; x<BWAPI::Broodwar->mapWidth(); ++x)
-	{
-		for (int y=0; y<BWAPI::Broodwar->mapHeight(); ++y)
-		{
-			BWAPI::Position p(x*32, y*32);
-
-			if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawTextMap(p.x(), p.y(), "%d", getMyBaseDistance(p));
-		}
-	}*/
 
 	BOOST_FOREACH (BWAPI::Unit * unit, BWAPI::Broodwar->getAllUnits())
 	{
@@ -110,11 +99,36 @@ void MapTools::update()
 			}
 
 			if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(unit->getPosition().x(), unit->getPosition().y(), 3, c);
-			//if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawTextMap(unit->getPosition().x(), unit->getPosition().y(), "%s", unit->getType().getName().c_str());
 		}
 	}
 
-	//drawMyRegion();
+	drawMapData();
+}
+
+void MapTools::drawMapData() {
+
+  // draw outlines of base locations in blue
+  BOOST_FOREACH (BWTA::BaseLocation * base, BWTA::getBaseLocations()) {
+        BWAPI::TilePosition tile = base->getTilePosition();
+        BWAPI::Broodwar->drawBox(BWAPI::CoordinateType::Map, tile.x()*32, tile.y()*32, tile.x()*32+4*32, tile.y()*32+3*32, BWAPI::Colors::Blue, false);
+  }
+
+  // draw outlines of regions in green
+  BOOST_FOREACH(BWTA::Region * region, BWTA::getRegions()) {
+        BWTA::Polygon poly = region->getPolygon();
+    
+    for (int j = 0; j < (int)poly.size(); j++) {
+        BWAPI::Position point1 = poly[j];
+        BWAPI::Position point2 = poly[(j+1) % poly.size()];      
+        BWAPI::Broodwar->drawLine(BWAPI::CoordinateType::Map, point1.x(), point1.y(), point2.x(), point2.y(), BWAPI::Colors::Green);
+    }
+
+    BOOST_FOREACH (BWTA::Chokepoint * chokepoint, region->getChokepoints()) {
+    BWAPI::Position point1 = chokepoint->getSides().first;
+    BWAPI::Position point2 = chokepoint->getSides().second;
+    BWAPI::Broodwar->drawLine(BWAPI::CoordinateType::Map, point1.x(), point1.y(), point2.x(), point2.y(), BWAPI::Colors::Red);
+    }
+  }
 }
 
 void MapTools::drawMyRegion()

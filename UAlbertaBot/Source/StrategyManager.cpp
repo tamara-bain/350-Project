@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "StrategyManager.h"
 
+
 // constructor
 StrategyManager::StrategyManager() 
 	: firstAttackSent(false)
@@ -25,11 +26,9 @@ void StrategyManager::addStrategies()
 	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 
-	//protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 1 0 3 0 0 0 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
-	//protossOpeningBook[ProtossZealotRush]	= "0";
-	//protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 3 0 7 5 0 0 12 3 13 0 22 22 22 22 0 1 0";
-    protossOpeningBook[ProtossDarkTemplar]	=     "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
+    protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
 	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
 	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
@@ -37,6 +36,10 @@ void StrategyManager::addStrategies()
 	if (selfRace == BWAPI::Races::Protoss)
 	{
 		results = std::vector<IntPair>(NumProtossStrategies);
+
+		if(BWTA::getStartLocations().size() == 2) {
+			usableStrategies.push_back(ProtossProbeRush);
+		}
 
 		if (enemyRace == BWAPI::Races::Protoss)
 		{
@@ -58,6 +61,7 @@ void StrategyManager::addStrategies()
 		else
 		{
 			BWAPI::Broodwar->printf("Enemy Race Unknown");
+			usableStrategies.push_back(ProtossProbeRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDragoons);
 		}
@@ -81,36 +85,21 @@ void StrategyManager::addStrategies()
 
 void StrategyManager::readResults()
 {
-	// read in the name of the read and write directories from settings file
 	struct stat buf;
-
-	// if the file doesn't exist something is wrong so just set them to default settings
-	if (stat(Options::FileIO::FILE_SETTINGS, &buf) == -1)
-	{
-		readDir = "bwapi-data/testio/read/";
-		writeDir = "bwapi-data/testio/write/";
-	}
-	else
-	{
-		std::ifstream f_in(Options::FileIO::FILE_SETTINGS);
-		getline(f_in, readDir);
-		getline(f_in, writeDir);
-		f_in.close();
-	}
-
-	// the file corresponding to the enemy's previous results
-	std::string readFile = readDir + BWAPI::Broodwar->enemy()->getName() + ".txt";
+	std::string file = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
 
 	// if the file doesn't exist, set the results to zeros
-	if (stat(readFile.c_str(), &buf) == -1)
-	{
+	if (stat(file.c_str(), &buf) == -1) {
 		std::fill(results.begin(), results.end(), IntPair(0,0));
 	}
-	// otherwise read in the results
-	else
-	{
-		std::ifstream f_in(readFile.c_str());
+	else {
+		std::ifstream f_in(file.c_str());
 		std::string line;
+		getline(f_in, line);
+		results[ProtossProbeRush].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossProbeRush].second = atoi(line.c_str());
+		f_in.close();
 		getline(f_in, line);
 		results[ProtossZealotRush].first = atoi(line.c_str());
 		getline(f_in, line);
@@ -123,18 +112,16 @@ void StrategyManager::readResults()
 		results[ProtossDragoons].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossDragoons].second = atoi(line.c_str());
-		f_in.close();
 	}
-
-	BWAPI::Broodwar->printf("Results (%s): (%d %d) (%d %d) (%d %d)", BWAPI::Broodwar->enemy()->getName().c_str(), 
-		results[0].first, results[0].second, results[1].first, results[1].second, results[2].first, results[2].second);
 }
 
 void StrategyManager::writeResults()
 {
-	std::string writeFile = writeDir + BWAPI::Broodwar->enemy()->getName() + ".txt";
-	std::ofstream f_out(writeFile.c_str());
+	std::string file = Options::FileIO::WRITE_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+	std::ofstream f_out(file.c_str());
 
+	f_out << results[ProtossProbeRush].first	<< "\n";
+	f_out << results[ProtossProbeRush].second	<< "\n";
 	f_out << results[ProtossZealotRush].first   << "\n";
 	f_out << results[ProtossZealotRush].second  << "\n";
 	f_out << results[ProtossDarkTemplar].first  << "\n";
@@ -181,20 +168,8 @@ void StrategyManager::setStrategy()
 	}
 	else
 	{
-		// otherwise return a random strategy
-
-        std::string enemyName(BWAPI::Broodwar->enemy()->getName());
-        
-        if (enemyName.compare("Skynet") == 0)
-        {
-            currentStrategy = ProtossDarkTemplar;
-        }
-        else
-        {
-            currentStrategy = ProtossZealotRush;
-        }
+		currentStrategy = Options::Macro::DEFAULT_STRATEGY;
 	}
-
 }
 
 void StrategyManager::onEnd(const bool isWinner)

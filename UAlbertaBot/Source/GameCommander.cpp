@@ -2,7 +2,7 @@
 #include "GameCommander.h"
 
 
-GameCommander::GameCommander() : numWorkerScouts(0), currentScout(NULL)
+GameCommander::GameCommander() : numWorkerScouts(0)
 {
 
 }
@@ -36,7 +36,11 @@ void GameCommander::update()
 	timerManager.stopTimer(TimerManager::Combat);
 
 	timerManager.startTimer(TimerManager::Scout);
-	if (Options::Modules::USING_SCOUTMANAGER)
+	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().ProtossProbeRush)
+	{
+		scoutRushManager.update(scoutUnits);
+	}
+	else if (Options::Modules::USING_SCOUTMANAGER)
 	{
 		scoutManager.update(scoutUnits);
 	}
@@ -69,7 +73,7 @@ void GameCommander::drawDebugInterface()
 	timerManager.displayTimers(490, 225);
 	
 	StarcraftBuildOrderSearchManager::Instance().drawSearchInformation(10, 240);
-	//BuildingManager::Instance().drawBuildingInformation(200,50);
+	BuildingManager::Instance().drawBuildingInformation(200,50);
 	ProductionManager::Instance().drawProductionInformation(10, 30);
 	InformationManager::Instance().drawUnitInformation(425,30);
 
@@ -78,7 +82,6 @@ void GameCommander::drawDebugInterface()
 	// draw position of mouse cursor
 	if (Options::Debug::DRAW_UALBERTABOT_DEBUG)
 	{
-		BWAPI::Broodwar->drawTextScreen(20, 20, "Frame: %7d\nTime: %4dm %3ds", BWAPI::Broodwar->getFrameCount(), BWAPI::Broodwar->getFrameCount()/(24*60), (BWAPI::Broodwar->getFrameCount()/24)%60);
 		int mouseX = BWAPI::Broodwar->getMousePosition().x() + BWAPI::Broodwar->getScreenPosition().x();
 		int mouseY = BWAPI::Broodwar->getMousePosition().y() + BWAPI::Broodwar->getScreenPosition().y();
 		BWAPI::Broodwar->drawTextMap(mouseX + 20, mouseY, " %d %d", mouseX, mouseY);
@@ -124,8 +127,12 @@ void GameCommander::setValidUnits()
 // TODO: take this worker away from worker manager in a clever way
 void GameCommander::setScoutUnits()
 {
-	// if we have just built our first suply provider, set the worker to a scout
-	if (numWorkerScouts == 0)
+	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().ProtossProbeRush) {
+		setScoutRushUnits();
+		return;
+	}
+
+	if (numWorkerScouts < 1)
 	{
 		// get the first supply provider we come across in our units, this should be the first one we make
 		BWAPI::Unit * supplyProvider = getFirstSupplyProvider();
@@ -139,7 +146,35 @@ void GameCommander::setScoutUnits()
 			// if we find a worker (which we should) add it to the scout vector
 			if (workerScout)
 			{
-				numWorkerScouts++;
+				++numWorkerScouts;
+				scoutUnits.insert(workerScout);
+				assignedUnits.insert(workerScout);
+				WorkerManager::Instance().setScoutWorker(workerScout);
+			}
+		}
+	}
+}
+
+void GameCommander::setScoutRushUnits() {
+	// check with the strategy manager to decide our scout numbers
+	// if we're using probe rush we want to send out probes right away
+	if (numWorkerScouts < Options::Macro::SCOUT_RUSH_COUNT) {
+
+		int worker_count = 0;
+		if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
+			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
+		else if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Zerg)
+			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Drone);
+		else if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss)
+			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+			
+		// wait until we're building our first worker to send the scout rush
+		if (worker_count == 5) {
+			// if we find a worker (which we should) add it to the scout vector
+			BWAPI::Unit * workerScout = getMineralWorker();
+			if (workerScout)
+			{
+				++numWorkerScouts;
 				scoutUnits.insert(workerScout);
 				assignedUnits.insert(workerScout);
 				WorkerManager::Instance().setScoutWorker(workerScout);
@@ -339,6 +374,7 @@ BWAPI::Unit * GameCommander::getClosestWorkerToTarget(BWAPI::Position target)
 
 	BOOST_FOREACH (BWAPI::Unit * unit, validUnits)
 	{
+		// Gets unassigned worker units that are idle or on minerals
 		if (!isAssigned(unit) && unit->getType().isWorker() && WorkerManager::Instance().isFree(unit))
 		{
 			double dist = unit->getDistance(target);
@@ -351,4 +387,17 @@ BWAPI::Unit * GameCommander::getClosestWorkerToTarget(BWAPI::Position target)
 	}
 
 	return closestUnit;
+}
+
+BWAPI::Unit * GameCommander::getMineralWorker()
+{
+	BOOST_FOREACH (BWAPI::Unit * unit, validUnits)
+	{
+		// Gets unassigned worker units that are idle or on minerals
+		if (!isAssigned(unit) && unit->getType().isWorker() && WorkerManager::Instance().isFree(unit))
+		{
+			return unit;
+		}
+	}
+	return NULL;
 }
