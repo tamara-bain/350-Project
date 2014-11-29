@@ -1,20 +1,20 @@
 350-Project
 ===========
 
-*General TODO:*  
+**General TODO:**  
 _ Fix Response to Scout Rush  
 _ Fix Response to flying buildigns  
 _ Fix Response to repairing SCVs  
 _ Fix Searching for Enemy when Enemy base is destroyed/not found  
 _ Fix ghetto "Only attack if mining" stuff that makes my probes not attack an SCV that is attacking us (not mining) and instead attack a new miner and we lose sometimes because of this on small maps vs icebot.
 
-*ScoutRushManager TODO:*  
+**ScoutRushManager TODO:**  
 X Add buildings to attack order
 X Return probes to Worker Manager when done  / Scout Map
 
 
 
-*Air Rush:*
+**Air Rush:**
 X implement hard-coded build order for cannons + 2 stargates  
   _ Try to implement logic to have the stargates not visible.. Right now they are spiral  
   _ Add in air offense upgrade, we can afford it  
