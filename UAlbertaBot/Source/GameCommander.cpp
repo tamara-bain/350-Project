@@ -158,27 +158,16 @@ void GameCommander::setScoutUnits()
 void GameCommander::setScoutRushUnits() {
 	// check with the strategy manager to decide our scout numbers
 	// if we're using probe rush we want to send out probes right away
-	if (numWorkerScouts < Options::Macro::SCOUT_RUSH_COUNT) {
 
-		int worker_count = 0;
-		if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Terran)
-			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Terran_SCV);
-		else if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Zerg)
-			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Zerg_Drone);
-		else if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss)
-			worker_count = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
-			
-		// wait until we're building our first worker to send the scout rush
-		if (worker_count == 5) {
-			// if we find a worker (which we should) add it to the scout vector
-			BWAPI::Unit * workerScout = getMineralWorker();
-			if (workerScout)
-			{
-				++numWorkerScouts;
-				scoutUnits.insert(workerScout);
-				assignedUnits.insert(workerScout);
-				WorkerManager::Instance().setScoutWorker(workerScout);
-			}
+	if (numWorkerScouts < Options::Macro::SCOUT_RUSH_COUNT) {
+		// if we find a worker (which we should) add it to the scout vector
+		BWAPI::Unit * workerScout = getMineralWorker();
+		if (workerScout)
+		{
+			++numWorkerScouts;
+			scoutUnits.insert(workerScout);
+			assignedUnits.insert(workerScout);
+			WorkerManager::Instance().setScoutWorker(workerScout);
 		}
 	}
 }
@@ -208,7 +197,7 @@ void GameCommander::setCombatUnits()
 			if (!isAssigned(unit) && unit->getType().isWorker())			
 			{	
 				// only assign it to combat if it's not building something
-				if (!WorkerManager::Instance().isBuilder(unit))
+				if (!WorkerManager::Instance().isBuilder(unit) && !WorkerManager::Instance().isWorkerScout(unit))
 				{
 					combatUnits.insert(unit);
 					assignedUnits.insert(unit);

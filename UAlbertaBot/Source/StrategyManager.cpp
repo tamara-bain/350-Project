@@ -26,7 +26,7 @@ void StrategyManager::addStrategies()
 	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 
-	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 1 0 3 0 0 0 4";
+	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
     protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";

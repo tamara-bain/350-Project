@@ -17,6 +17,7 @@ void ScoutRushManager::update(const std::set<BWAPI::Unit *> & scoutUnits) {
 				numWorkerScouts++;
 				workerScouts.insert(scout);
 				scoutFleeing[scout->getID()] = false;
+                scoutMovingFromFleeing[scout->getID()] = false;
 			}
 		}
 	}
@@ -25,12 +26,16 @@ void ScoutRushManager::update(const std::set<BWAPI::Unit *> & scoutUnits) {
 
 		// Get a leader for our scouts to follow (do this every time in case he died)
 		BWAPI::Unit * leader = NULL;
+        numWorkerScouts = 0;
 		BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
-			if (!scout || !scout->exists() || !scout->getPosition().isValid()) 
+			if (!scout || !scout->exists() || !scout->getPosition().isValid()) {
 				continue;
+            }
 			
-			leader = scout;
-			break;
+            if (leader == NULL) 
+			    leader = scout;
+			
+            numWorkerScouts++;
 		}
 
 		if (leader == NULL)
@@ -119,48 +124,63 @@ void ScoutRushManager::allInAttack() {
 
 	BWAPI::Unit * target = NULL; 
 
-    std::vector<GroundThreat> groundThreats;
-	fillGroundThreats(groundThreats);
-
-    if (getAttackingWorkers() > Options::Macro::SCOUT_RUSH_COUNT + 1) {
-        BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
-
-            BWAPI::Position fleeTo = calcFleePosition(groundThreats, scout);
-            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(fleeTo.x(), fleeTo.y(), 10, BWAPI::Colors::Red);
-            smartMove(scout, fleeTo);
-        }
-        return;
-    }
-
 	// first find out which scouts are being attacked, and if any are low health/sheilds
 	BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
-		if (scout->isUnderAttack()) {
+        int attackers = getAttackingWorkers(scout);
+        int nonFleeingScouts = getNonFleeingScouts(scout);
+        BWAPI::Broodwar->printf("scouts %d", numWorkerScouts);
+
+        if (scout->isUnderAttack() && attackers > nonFleeingScouts) {
+            scoutFleeing[scout->getID()] = true;
+        }
+		else if (scout->isUnderAttack()) {
+
+            // save their attacker as the current target
+			target = getAttacker(scout);
+            
 			// if a scout is low health/sheilds than mark them as fleeing
-			if (scout->getHitPoints() < 11 && scout->getShields() == 0) {
+			if (scout->getHitPoints() + scout->getShields() < 11) {
 				scoutFleeing[scout->getID()] = true;
 			}
 
-			// save their attacker as the current target
-			target = getAttacker(scout);
+
 		}
-		if ((!scout->isUnderAttack() && !enemyInRadius(scout)) || (((scout->getHitPoints()) + (scout->getShields())) > 10)) {
+
+        if(fleeingScoutInRadius(scout, scout->getPosition()) && attackers > nonFleeingScouts) {
+            scoutMovingFromFleeing[scout->getID()] = true;
+        }
+        else {
+            scoutMovingFromFleeing[scout->getID()] = false;
+        }
+
+		if ((!scout->isUnderAttack() && !enemyInRadius(scout)) || (((scout->getHitPoints()) + (scout->getShields())) > 10 && 
+            attackers < nonFleeingScouts)) {
 			scoutFleeing[scout->getID()] = false;
 		}
 	}
 
 	BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
+        int attackers = getAttackingWorkers(scout);
+
 		// if we're fleeing we don't have time to attack
-		if (scoutFleeing[scout->getID()] == true) {
+		if (scoutFleeing[scout->getID()] == true || scoutMovingFromFleeing[scout->getID()] == true) {
+
+            std::vector<GroundThreat> groundThreats;
+            
+
+	        fillGroundThreats(groundThreats, scout);
+            BWAPI::Position pos = scout->getPosition();
 			BWAPI::Position fleeTo = calcFleePosition(groundThreats, scout);
-            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(fleeTo.x(), fleeTo.y(), 10, BWAPI::Colors::Red);
+
+            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawLineMap(pos.x(), pos.y(), fleeTo.x(), fleeTo.y(), BWAPI::Colors::Red);
             smartMove(scout, fleeTo);
-			continue;
+            continue;
 		}
 
 		// otherwise find a target if non exists
-
-		if (target == NULL || !target->exists() || !target->getPosition().isValid())
-			target = getScoutRushTarget(scout);
+		if (target == NULL || !target->exists() || !target->getPosition().isValid()) {
+	        target = getScoutRushTarget(scout);
+        }
 
 		// attack a target if one exists
 		if (target != NULL && target->exists() && target->getPosition().isValid()) {
@@ -169,34 +189,44 @@ void ScoutRushManager::allInAttack() {
 		}
 
 		// if we've reached the enemy base with no target
-		if (scout->getDistance(enemyBase->getPosition()) < 5) {
+		if (scout->getDistance(enemyBase->getPosition()) < 30) {
 			WorkerManager::Instance().finishedWithScoutWorker(scout);
 			continue;
 		}
 
-        BWAPI::Broodwar->printf("MOVING");
 		// otherwise keep moving into the enemy base
 		smartMove(scout, enemyBase->getPosition());
 	}
 }
 
-int ScoutRushManager::getAttackingWorkers() {
+int ScoutRushManager::getAttackingWorkers(BWAPI::Unit * scout) {
     int attackingWorkers = 0;
     
     BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits()) {
 
-        // if they're not in the enemy region we don't care
-		BWAPI::TilePosition tile(unit->getPosition());
-		BWTA::Region * region = tile.isValid() ? BWTA::getRegion(tile) : NULL;
-
-        if (!region || region != enemyRegion)
+        // if they're not in the enemy region we don't care or they're a worker doing workery things we don't care
+        if (scout->getDistance(unit->getPosition()) > 300)
             continue;
 
-        if ((unit->isAttacking() || !(unit->isGatheringMinerals())) && unit->getType().isWorker()) {
+
+        if (unit->getType().isWorker() && !(isDoingWorkerStuff(unit)))
 		    ++attackingWorkers;
-	    }
     }
     return attackingWorkers;
+}
+
+int ScoutRushManager::getNonFleeingScouts(BWAPI::Unit * scout) {
+    int nonFleeingScouts = 0;
+    
+    BOOST_FOREACH(BWAPI::Unit * ally, workerScouts) {
+
+        // if they're not close by they don't could
+        if (scoutFleeing[ally->getID()] == true || scout->getDistance(ally->getPosition()) > 300)
+            continue;
+
+        nonFleeingScouts++;
+    }
+    return nonFleeingScouts;
 }
 
 BWAPI::Unit * ScoutRushManager::getAttacker(BWAPI::Unit * scout) {
@@ -230,11 +260,13 @@ BWAPI::Unit * ScoutRushManager::getLastTarget(BWAPI::Unit * scout) {
 
 		BWAPI::Unit * target = lastCommand.getTarget();
 		// we're only interested in staying on target if the last target was a valid enemy unit
-		if (target != NULL && target->exists() && !target->getPosition().isValid() && target->getType().canMove()) {
+		if (target != NULL && target->exists() && target->getPosition().isValid() && target->getType().canMove()) {
 
 			// only stay on target if the unit stays within range of us
-			if (target->getDistance(position) < range + 20)
-				return target;
+            BOOST_FOREACH(BWAPI::Unit * scout, workerScouts) {
+			    if (target->getDistance(scout) < range + 10)
+				    return target;
+            }
 		}
 	}
 
@@ -243,28 +275,36 @@ BWAPI::Unit * ScoutRushManager::getLastTarget(BWAPI::Unit * scout) {
 
 BWAPI::Unit * ScoutRushManager::getScoutRushTarget(BWAPI::Unit * scout)
 {
+    if (!scout || !scout->exists() || !scout->getPosition().isValid())
+        return NULL;
+
 	// if the last command was an attack try to get the last target
 	BWAPI::Unit * closestEnemyWorker = getLastTarget(scout);
 
 	if (closestEnemyWorker != NULL)
 		return closestEnemyWorker;
 
-	// return the closest mineral gathering worker
+	// return the closest worker
 	BWAPI::Unit * closestEnemyOther = NULL;
 	double closestDist = 100000;
 	BWAPI::Position position = scout->getPosition();
 	int range = scout->getType().groundWeapon().maxRange();
+    int attackers = getAttackingWorkers(scout);
+    int nonFleeing = getNonFleeingScouts(scout);
 
 	// for each enemy worker find the closest or one in weapons range
 	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits()) {
 
-			double dist = unit->getDistance(position);
-			double distToGeyser = getEnemyGeyser() -> getDistance(unit);
+		double dist = unit->getDistance(position);
+		double distToBase = unit -> getDistance(enemyBase->getPosition());
 
-			if (distToGeyser > 800)
-				continue;
+		if (distToBase > 500)
+			continue;
 
-		if (unit->getType().isWorker()) {
+        if (unit->getType().isWorker()) {
+
+            if (attackers > nonFleeing && !unit->isGatheringMinerals())
+                continue;
 
 			// if an enemy worker is in range we don't have to search anymore
 			if (dist <= range)
@@ -274,10 +314,10 @@ BWAPI::Unit * ScoutRushManager::getScoutRushTarget(BWAPI::Unit * scout)
 				closestEnemyWorker = unit;
 				closestDist = dist;
 			}
-		}
+        }
 
 		else if (!closestEnemyWorker) {
-			if ((!closestEnemyOther || dist < closestDist) && !(unit->isLifted())) {
+            if ((!closestEnemyOther || dist < closestDist) && !(unit->isLifted()) && unit->getType() != BWAPI::UnitTypes::Zerg_Larva) {
 				closestEnemyOther = unit;
 				closestDist = dist;
 			}
@@ -290,9 +330,43 @@ BWAPI::Unit * ScoutRushManager::getScoutRushTarget(BWAPI::Unit * scout)
 	return closestEnemyOther;
 }
 
-BWAPI::Unit * ScoutRushManager::getFleeTarget(BWAPI::Unit * scout)
+BWAPI::Unit * ScoutRushManager::getMineralWorker(BWAPI::Unit * scout)
 {
 	// if the last command was an attack try to get the last target
+	BWAPI::Unit * closestEnemyWorker = getLastTarget(scout);
+
+    if (closestEnemyWorker != NULL && closestEnemyWorker->isGatheringMinerals())
+		return closestEnemyWorker;
+
+	// return the closest mineral gathering worker
+	BWAPI::Unit * closestEnemyOther = NULL;
+	double closestDist = 100000;
+	BWAPI::Position position = scout->getPosition();
+	int range = scout->getType().groundWeapon().maxRange();
+
+	// for each enemy worker find the closest or one in weapons range
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits()) {
+
+        double dist = unit->getDistance(position);
+
+        if (unit->isGatheringMinerals()) {
+
+			// if an enemy worker is in range we don't have to search anymore
+			if (dist <= range)
+				return unit;
+
+			if (!closestEnemyWorker || dist < closestDist) {
+				closestEnemyWorker = unit;
+				closestDist = dist;
+			}
+		}
+	}
+
+	return closestEnemyWorker;
+}
+
+BWAPI::Unit * ScoutRushManager::getFleeTarget(BWAPI::Unit * scout)
+{
 	BWAPI::Unit * target = NULL;
 
 	// for each enemy worker find the closest or one in weapons range
@@ -331,7 +405,8 @@ bool ScoutRushManager::enemyInRadius(BWAPI::Unit * scout)
 {
 	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits()) {
 
-		if (unit->getType().canAttack() && (unit->getDistance(scout) < 200)) {
+		if (unit->getType().canAttack() && (unit->getDistance(scout) < 175)
+            && !isDoingWorkerStuff(unit)) {
 			return true;
 		}
 	}
@@ -339,17 +414,43 @@ bool ScoutRushManager::enemyInRadius(BWAPI::Unit * scout)
 	return false;
 }
 
-void ScoutRushManager::fillGroundThreats(std::vector<GroundThreat> & threats)
+bool ScoutRushManager::fleeingScoutInRadius(BWAPI::Unit * scout, BWAPI::Position pos)
 {
+	BWAPI::Unit * target = NULL;
+
+	BOOST_FOREACH(BWAPI::Unit * unit, workerScouts) {
+
+		if (unit != scout && unit->getDistance(scout) < 80 && scoutFleeing[unit->getID()] == true) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool ScoutRushManager::isDoingWorkerStuff(BWAPI::Unit * unit) {
+    if (unit->isGatheringMinerals() || unit->isGatheringGas() || unit->isConstructing())
+        return true;
+    return false;
+}
+
+void ScoutRushManager::fillGroundThreats(std::vector<GroundThreat> & threats, BWAPI::Unit * scout)
+{
+
+    BOOST_FOREACH(BWAPI::Unit* scout, workerScouts) {
+        if (scoutFleeing[scout->getID()] == true && scout != scout) {
+		    GroundThreat threat;
+		    threat.unit		= scout;
+		    threat.weight	= 5;
+		    threats.push_back(threat);
+        }
+    }
     // get the ground threats in the enemy region
 	BOOST_FOREACH (BWAPI::Unit * enemy, BWAPI::Broodwar->enemy()->getUnits())
 	{
-		// if they're not in the enemy region we don't care
-		BWAPI::TilePosition tile(enemy->getPosition());
-		BWTA::Region * region = tile.isValid() ? BWTA::getRegion(tile) : NULL;
-
-        if (!region || region != enemyRegion)
-            return;
+		// if they're not in the enemy region we don't care or they're a worker doing workery things we don't care
+        if (isDoingWorkerStuff(enemy) || scout->getDistance(enemy->getPosition()) > 175)
+            continue;
 
 		// get the air weapon of the unit
 		BWAPI::WeaponType groundWeapon(enemy->getType().groundWeapon());
@@ -365,9 +466,10 @@ void ScoutRushManager::fillGroundThreats(std::vector<GroundThreat> & threats)
 	}
 }
 
-
 void ScoutRushManager::smartMove(BWAPI::Unit * scout, BWAPI::Position targetPosition)
 {
+    if (!scout || !(scout->exists()))
+        return;
 	// if we have issued a command to this unit already this frame, ignore this one
 	if (scout->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount())
 		return;
@@ -400,19 +502,36 @@ void ScoutRushManager::drawDebugData() {
         int x = scout->getPosition().x();
         int y = scout->getPosition().y();
 
+        BWAPI::Broodwar->drawCircleMap(enemyBase->getPosition().x(), enemyBase->getPosition().y(), 300, BWAPI::Colors::Red);
+
+
         BWAPI::Unit * target = scout->getTarget();
-	    BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Yellow, false);
+	   
         if(target) {
             int tx = target->getPosition().x();
             int ty = target->getPosition().y();
 
-            if (scout->isInWeaponRange(target)) 
-                BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange()+20, BWAPI::Colors::Red, false);
-             BWAPI::Broodwar->drawLineMap(x, y, tx, ty, BWAPI::Colors::Cyan);
+            if (scout->isInWeaponRange(target)) {
+                BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Red, false);
+            }
+            else {
+                 BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Yellow, false);
+            }
         }
 
-	    if(scoutFleeing[scout->getID()] == true) {
+        if (scout -> isStuck()) {
+             BWAPI::Broodwar->drawTextMap(x, y, "Stuck!!!");
+        }
+
+	    else if(scoutFleeing[scout->getID()] == true) {
 	        BWAPI::Broodwar->drawTextMap(x, y, "Fleeing!");
+            BWAPI::Broodwar->drawCircleMap(x, y, 200, BWAPI::Colors::Green, false);
+            BWAPI::Broodwar->drawCircleMap(x, y, 100, BWAPI::Colors::Purple, false);
+        }
+
+        else if(scoutMovingFromFleeing[scout->getID()] == true) {
+	        BWAPI::Broodwar->drawTextMap(x, y, "Moving Aside!");
+            BWAPI::Broodwar->drawCircleMap(x, y, 20, BWAPI::Colors::Purple, false);
         }
 
         BWAPI::Position maxBar =  BWAPI::Position((static_cast<int>((double)TILE_SIZE*0.7)), TILE_SIZE/10);
@@ -435,70 +554,65 @@ void ScoutRushManager::drawDebugData() {
 BWAPI::Position ScoutRushManager::calcFleePosition(const std::vector<GroundThreat> & threats, BWAPI::Unit * scout) 
 {
 	// calculate the standard flee vector
-	double2 fleeVector = getFleeVector(threats, scout);
+    BWAPI::Position pos = scout->getPosition();
 
-	// vector to the target, if one exists
-	double2 targetVector(0,0);
 
-	int mult = 1;
-	if (scout->getID() % 2) 
-		mult = -1;
+    int mult = 1;
+    if (scout->getID() % 2)
+        mult = -1;
+
+    double2 fleeVector(0,0);
+    fleeVector = getFleeVector(threats, pos);
+
 
 	// rotate the flee vector by 30 degrees, this will allow us to circle around and come back at a target
 	//fleeVector.rotate(mult*30);
 	double2 newFleeVector;
-
-	int r = 0;
-	int sign = 1;
 	int iterations = 0;
-		
+	int r = 30;
+    std::vector<double2> moves;
+
 	// keep rotating the vector until the new position is able to be walked on
-	while (r <= 360) 
+	while (iterations < 73) 
 	{
 		// rotate the flee vector
-		fleeVector.rotate(mult*r);
+        newFleeVector = fleeVector;
+        newFleeVector.rotate(mult*r);
+
 
 		// re-normalize it
-		fleeVector.normalise();
-
-		// new vector should semi point back at the target
-		newFleeVector = fleeVector * 2 + targetVector;
+		newFleeVector.normalise();
 
 		// the position we will attempt to go to
-		BWAPI::Position test(scout->getPosition() + newFleeVector * 24);
-
-		if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawLineMap(scout->getPosition().x(), scout->getPosition().y(), test.x(), test.y(), BWAPI::Colors::Cyan);
-
+		BWAPI::Position test(pos + newFleeVector * 56);
 
 		// if the position is able to be walked on, break out of the loop
-		if (isValidFleePosition(test))
+		if (isValidFleePosition(test, scout, newFleeVector)) {
 			break;
+        }
 
-		r = r + sign * (r + 10);
-		sign = sign * -1;
+        if (r >=0)
+            r = -(r+5);
+        else
+            r = -r;
 
-		if (++iterations > 36)
-			break;
+        ++iterations;
 	}
 
 	// go to the calculated 'good' position
-	BWAPI::Position fleeTo(scout->getPosition() + newFleeVector * 24);
+	BWAPI::Position fleeTo(pos + newFleeVector * 56);
 	
-	
-	if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawLineMap(scout->getPosition().x(), scout->getPosition().y(), fleeTo.x(), fleeTo.y(), BWAPI::Colors::Orange);
-	
-
 	return fleeTo;
 }
 
-double2 ScoutRushManager::getFleeVector(const std::vector<GroundThreat> & threats, BWAPI::Unit * scout)
+double2 ScoutRushManager::getFleeVector(const std::vector<GroundThreat> & threats, BWAPI::Position pos)
 {
 	double2 fleeVector(0,0);
 
 	BOOST_FOREACH (const GroundThreat & threat, threats)
 	{
-		// Get direction from enemy to mutalisk
-		const double2 direction(scout->getPosition() - threat.unit->getPosition());
+		// Get direction from enemy
+		const double2 direction(pos - threat.unit->getPosition());
 
 		// Divide direction by square distance, weighting closer enemies higher
 		//  Dividing once normalises the vector
@@ -508,15 +622,14 @@ double2 ScoutRushManager::getFleeVector(const std::vector<GroundThreat> & threat
 		{
 			// Enemy influence is direction to flee from enemy weighted by danger posed by enemy
 			const double2 enemyInfluence( (direction / distanceSq) * threat.weight );
-
 			fleeVector = fleeVector + enemyInfluence;
 		}
 	}
 
-	if(fleeVector.lenSq() == 0)
+	if(fleeVector.lenSq() == 0 || threats.size()==0)
 	{
 		// Flee towards our base
-		fleeVector = double2(1,0);	
+		fleeVector = double2(ourBase->getPosition().x(),ourBase->getPosition().y());	
 	}
 
 	fleeVector.normalise();
@@ -524,55 +637,77 @@ double2 ScoutRushManager::getFleeVector(const std::vector<GroundThreat> & threat
 	return fleeVector;
 }
 
-bool ScoutRushManager::isValidFleePosition(BWAPI::Position pos) 
+bool ScoutRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * scout, double2 fleeVector) 
 {
+
+    if (!pos.isValid())
+        return false;
 
 	// get x and y from the position
 	int x(pos.x()), y(pos.y());
-
+    
 	// walkable tiles exist every 8 pixels
 	bool good = BWAPI::Broodwar->isWalkable(x/8, y/8);
 	
 	// if it's not walkable throw it out
 	if (!good) return false;
-	
-	// for each of those units, if it's a building or an attacking enemy unit we don't want to go there
-	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->getUnitsOnTile(x/32, y/32)) 
-	{
-		if	(unit->getType().isBuilding() || unit->getType().isResourceContainer() || 
-			(unit->getPlayer() != BWAPI::Broodwar->self() && unit->getType().groundWeapon() != BWAPI::WeaponTypes::None)) 
-		{		
-				return false;
-		}
-	}
 
-	int geyserDist = 50;
-	int mineralDist = 32;
+	// don't go anywhere that is occupied (but we'' try to force our way through for workers)
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->getUnitsOnTile(x/32, y/32)) {
+        if	(!unit->isLifted() && !unit->getType().isFlyer() && !unit->getType().isWorker())
+		    return false;
+    }
+
+	int geyserDist = 16;
+	int mineralDist = 8;
+    int baseDist = 90;
 
 	BWTA::BaseLocation * enemyLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
 
 	BWAPI::Unit * geyser = getEnemyGeyser();
 	if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(geyser->getPosition().x(), geyser->getPosition().y(), geyserDist, BWAPI::Colors::Red);
 
+    // stay away from geysers
 	if (geyser->getDistance(pos) < geyserDist)
-	{
 		return false;
-	}
 
-	BOOST_FOREACH (BWAPI::Unit * mineral, enemyLocation->getMinerals())
-	{
+	BOOST_FOREACH (BWAPI::Unit * mineral, enemyLocation->getMinerals()) {
+        if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(mineral->getPosition().x(), mineral->getPosition().y(), mineralDist, BWAPI::Colors::Red);
 		if (mineral->getDistance(pos) < mineralDist)
-		{
 			return false;
-		}
-	}
+    }
 
-	BWTA::Region * enemyRegion = enemyLocation->getRegion();
-	if (enemyRegion && BWTA::getRegion(BWAPI::TilePosition(pos)) != enemyRegion)
-	{
+    if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawCircleMap(enemyBase->getPosition().x(), enemyBase->getPosition().y(), baseDist, BWAPI::Colors::Red);
+    // stay away from geysers
+	if (enemyBase->getPosition().getDistance(pos) < baseDist) {
 		return false;
-	}
+    }
 
+    if (BWTA::getRegion(BWAPI::TilePosition(pos)) != enemyRegion)
+		return false;
+
+
+    double2 checkIfNarrow2(fleeVector);
+    double2 checkIfNarrow3(fleeVector);
+
+    checkIfNarrow2.rotate(45);
+    checkIfNarrow3.rotate(-45);
+
+    checkIfNarrow2.normalise();
+    checkIfNarrow3.normalise();
+    BWAPI::Position scoutPos = scout->getPosition();
+    BWAPI::Position test2(scoutPos  + checkIfNarrow2 * 250);
+    BWAPI::Position test3(scoutPos  + checkIfNarrow3 * 250);
+
+	if (BWTA::getRegion(BWAPI::TilePosition(test2)) != enemyRegion &&
+        BWTA::getRegion(BWAPI::TilePosition(test3)) != enemyRegion) {
+            BWAPI::Broodwar->printf("Too Narrow");
+
+            BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test2.x(), test2.y(), BWAPI::Colors::Red);
+            BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test3.x(), test3.y(), BWAPI::Colors::Red);
+                        BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), pos.x(), pos.y(), BWAPI::Colors::Green);
+        return false;
+    }
 	// otherwise it's okay
 	return true;
 }
