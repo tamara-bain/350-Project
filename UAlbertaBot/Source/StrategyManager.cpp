@@ -25,18 +25,41 @@ void StrategyManager::addStrategies()
 	protossOpeningBook = std::vector<std::string>(NumProtossStrategies);
 	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
+	
+	/*
+	0	= probe							16	= observatory
+	1	= pylon							17	= stargate
+	2	= nexus							18	= scout
+	3	= gateway						19	= arbiter tribunal
+	4	= zealot						20	= arbiter
+	5	= cybernetics core					21	= shield battery
+	6	= dragoon						22	= dark templar
+	7	= assimilator						23	= shuttle
+	8	= singularity charge(upgrade)				24	= reaver
+	9	= forge							25	= observer
+	10  	= photon cannon						26	= corsair
+	11  	= high templar						27	= fleet beacon
+	12	= citadel of adun					28	= carrier
+	13	= templar archives					29	= leg enahncements(upgraade)
+	14	= robotics facility
+	15	= robotics support bay
+	*/
+
+
 
 	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
-    protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
-    protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
+    	protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+	 protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
+	protossOpeningBook[ProtossShield]		= "0 0 0 1 0 3 0 4 0 4 3 4 4 0 9 0 4";
 	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
 	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
 		results = std::vector<IntPair>(NumProtossStrategies);
-
+		usableStrategies.push_back(ProtossShield);
+		
 		if(BWTA::getStartLocations().size() == 2) {
 			usableStrategies.push_back(ProtossProbeRush);
 		}
