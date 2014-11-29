@@ -28,5 +28,5 @@ public:
 	void				update(const std::set<BWAPI::Unit *> & defenseUnits);
 	BWTA::Chokepoint *	getNearestChokepoint();
 	void				workerScoutDefense();
-	void				customBuild(BWAPI::UnitType b)
+	void				customBuild(BWAPI::UnitType b);
 };
