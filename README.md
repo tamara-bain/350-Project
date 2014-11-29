@@ -27,4 +27,8 @@ _ Implement Air Commander logic + Air Micro
 	_ Maintain air superiority mode (kill gas, cybernetics core, missle turrets, etc..)  
 		_ OPTIONAL: add in corsairs w/ disruptor webs to kill turrets .. cool idea but a lot of work  
 	_ Harassment mode (When air superiority is lost, just do hit and run on resources, like Carpet Bombing)  
-		_ Add a fleet beacon and research speed tech  
+		_ Add a fleet beacon and research speed tech
+		
+**BatteryStratManager TODO:**
+_ If possible get chokepoint position so it's at the top of the ramp/area so closer to base
+_ Try to make starting build order more efficient for this strat
