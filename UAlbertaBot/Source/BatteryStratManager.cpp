@@ -11,8 +11,6 @@ BatteryStratManager::BatteryStratManager()
 	numCannons = 0;
 	defSquad.clearSquadData();
 	batteryUnit = NULL;
-	newx = 0;
-	newy = 0;
 }
 
 void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits) 
@@ -26,7 +24,6 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 	numCannons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	flagBattery = false;
 	batteryUnit = NULL;
-	BWAPI::Broodwar->drawCircleMap(newx, newy, 5, BWAPI::Colors::Red, true);
 
 	//start the custom building for battery strategy after a set time, checks every 2s for update to reduce load
 	if (BWAPI::Broodwar->getFrameCount() >= 6000 && (BWAPI::Broodwar->getFrameCount() % 48 == 0))
