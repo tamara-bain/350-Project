@@ -18,8 +18,6 @@ class BatteryStratManager {
 	bool						haveBattery;
 	bool						flagBattery;
 	int							numCannons;
-	int							newx;
-	int							newy;
 	SquadData					defSquad;
 	BWAPI::Unit	*				batteryUnit;
 
