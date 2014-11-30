@@ -41,6 +41,7 @@ void Squad::update()
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
 		meleeManager.regroup(regroupPosition);
+		airManager.regroup(regroupPosition);
 		rangedManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
@@ -48,6 +49,7 @@ void Squad::update()
 		InformationManager::Instance().lastFrameRegroup = 1;
 
 		meleeManager.execute(order);
+		airManager.execute(order);
 		rangedManager.execute(order);
 		transportManager.execute(order);
 
@@ -110,6 +112,7 @@ void Squad::setManagerUnits()
 {
 	UnitVector meleeUnits;
 	UnitVector rangedUnits;
+	UnitVector airUnits;
 	UnitVector detectorUnits;
 	UnitVector transportUnits;
 
@@ -128,6 +131,10 @@ void Squad::setManagerUnits()
 			{
 				transportUnits.push_back(unit);
 			}
+			// select air units
+			else if (unit->getType().isFlyer()) {
+				airUnits.push_back(unit);
+			}
 			// select ranged units
 			else if ((unit->getType().groundWeapon().maxRange() > 32) || (unit->getType() == BWAPI::UnitTypes::Protoss_Reaver))
 			{
@@ -142,6 +149,7 @@ void Squad::setManagerUnits()
 	}
 
 	meleeManager.setUnits(meleeUnits);
+	airManager.setUnits(airUnits);
 	rangedManager.setUnits(rangedUnits);
 	detectorManager.setUnits(detectorUnits);
 	transportManager.setUnits(detectorUnits);
@@ -162,6 +170,13 @@ bool Squad::needsToRegroup()
 		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
 	{
 		regroupStatus = std::string("\x04 DARK TEMPLAR HOOOOO!");
+		return false;
+	}
+
+	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush &&
+		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
+	{
+		regroupStatus = std::string("\x04 Protoss Air rush");
 		return false;
 	}
 

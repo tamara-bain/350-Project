@@ -6,6 +6,7 @@
 #include "BuildingData.h"
 #include "InformationManager.h"
 #include "MapTools.h"
+#include "StrategyManager.h"
 
 class BuildingManager {
 

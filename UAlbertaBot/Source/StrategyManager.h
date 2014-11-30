@@ -42,6 +42,10 @@ class StrategyManager
 	const	double				getUCBValue(const size_t & strategy) const;
 	
 	// protoss strategy
+	const	bool				expandProtossAirRush() const;
+	const	std::string			getProtossAirRushOpeningBook() const;
+	const   MetaPairVector		getProtossAirRushBuildOrderGoal() const;
+
 	const	bool				expandProtossZealotRush() const;
 	const	std::string			getProtossZealotRushOpeningBook() const;
 	const	MetaPairVector		getProtossZealotRushBuildOrderGoal() const;
@@ -63,7 +67,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossProbeRush=0, ProtossZealotRush=1, ProtossDarkTemplar=2, ProtossDragoons=3, NumProtossStrategies=4 };
+	enum { ProtossProbeRush=0, ProtossAirRush=1, ProtossZealotRush=2, ProtossDarkTemplar=3, ProtossDragoons=4, NumProtossStrategies=5 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 

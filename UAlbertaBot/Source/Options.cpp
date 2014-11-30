@@ -164,7 +164,7 @@ namespace Options
 
 	namespace Macro								// options for macro strategies
 	{
-		extern int SCOUT_RUSH_COUNT				= 4;		// number of scouts when using the rush strategy
-        extern int DEFAULT_STRATEGY				= StrategyManager::ProtossZealotRush;		// default strategy to use when not using fileio
+		extern int SCOUT_RUSH_COUNT				= 4;									// number of scouts when using the rush strategy
+        extern int DEFAULT_STRATEGY				= StrategyManager::ProtossAirRush;		// default strategy to use when not using fileio
 	}
 }

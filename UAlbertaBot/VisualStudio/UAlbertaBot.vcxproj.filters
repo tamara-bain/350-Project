@@ -166,6 +166,7 @@
       <Filter>extra</Filter>
     </ClCompile>
     <ClCompile Include="..\Source\ScoutRushManager.cpp" />
+    <ClCompile Include="..\Source\micromanagement\AirManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\CombatCommander.h">
@@ -298,5 +299,6 @@
       <Filter>extra</Filter>
     </ClInclude>
     <ClInclude Include="..\Source\ScoutRushManager.h" />
+    <ClInclude Include="..\Source\micromanagement\AirManager.h" />
   </ItemGroup>
 </Project>

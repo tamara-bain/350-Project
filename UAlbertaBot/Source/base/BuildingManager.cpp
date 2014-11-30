@@ -148,8 +148,13 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 	// special case for early pylons
 	if (b.type == BWAPI::UnitTypes::Protoss_Pylon && (numPylons < 3))
 	{
-		BWAPI::TilePosition posInRegion =    BuildingPlacer::Instance().getBuildLocationNear(b, 4, true);
-		BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, 4, false);
+		int space = 4;
+		if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush) {
+		 space = 2;
+		}
+
+		BWAPI::TilePosition posInRegion =    BuildingPlacer::Instance().getBuildLocationNear(b, space, true);
+		BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, space, false);
 
 		testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
 	}
@@ -173,7 +178,9 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		else
 		{
 			// set the building padding specifically
-			int distance = b.type == BWAPI::UnitTypes::Protoss_Photon_Cannon ? 0 : 1;
+			//int distance = b.type == BWAPI::UnitTypes::Protoss_Photon_Cannon ? 0 : 1;
+			int distance = b.type == BWAPI::UnitTypes::Protoss_Pylon ? 1 : 0;
+			
 
 			// whether or not we want the distance to be horizontal only
             bool horizontalOnly = b.type == BWAPI::UnitTypes::Protoss_Citadel_of_Adun ? true : false;

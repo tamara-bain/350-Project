@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "micromanagement/MeleeManager.h"
+#include "micromanagement/AirManager.h"
 #include "micromanagement/RangedManager.h"
 #include "micromanagement/DetectorManager.h"
 #include "micromanagement/TransportManager.h"
@@ -16,6 +17,7 @@ class DragoonManager;
 class ObserverManager;
 
 class MeleeManager;
+class AirManager;
 class RangedManager;
 class DetectorManager;
 
@@ -28,6 +30,7 @@ class Squad
 	
 	SquadOrder			order;
 	MeleeManager		meleeManager;
+	AirManager			airManager;
 	RangedManager		rangedManager;
 	DetectorManager		detectorManager;
 	TransportManager	transportManager;

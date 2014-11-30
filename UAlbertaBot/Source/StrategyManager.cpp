@@ -27,6 +27,7 @@ void StrategyManager::addStrategies()
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 
 	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 1 0 3 0 0 0 4";
+	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 18 18 10 30 1 10 10 18 18 1";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
     protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
@@ -43,18 +44,21 @@ void StrategyManager::addStrategies()
 
 		if (enemyRace == BWAPI::Races::Protoss)
 		{
+			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
 			usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Terran)
 		{
+			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
 			usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Zerg)
 		{
+			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDragoons);
 		}
@@ -62,6 +66,7 @@ void StrategyManager::addStrategies()
 		{
 			BWAPI::Broodwar->printf("Enemy Race Unknown");
 			usableStrategies.push_back(ProtossProbeRush);
+			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDragoons);
 		}
@@ -96,10 +101,14 @@ void StrategyManager::readResults()
 		std::ifstream f_in(file.c_str());
 		std::string line;
 		getline(f_in, line);
-		results[ProtossProbeRush].first = atoi(line.c_str());
+		//results[ProtossProbeRush].first = atoi(line.c_str());
+		//getline(f_in, line);
+		//results[ProtossProbeRush].second = atoi(line.c_str());
+		//getline(f_in, line);
+		results[ProtossAirRush].first = atoi(line.c_str());
 		getline(f_in, line);
-		results[ProtossProbeRush].second = atoi(line.c_str());
-		f_in.close();
+		results[ProtossAirRush].second = atoi(line.c_str());
+		f_in.close(); // Tamara is this a bug?
 		getline(f_in, line);
 		results[ProtossZealotRush].first = atoi(line.c_str());
 		getline(f_in, line);
@@ -122,6 +131,8 @@ void StrategyManager::writeResults()
 
 	f_out << results[ProtossProbeRush].first	<< "\n";
 	f_out << results[ProtossProbeRush].second	<< "\n";
+	f_out << results[ProtossAirRush].first      << "\n";
+	f_out << results[ProtossAirRush].second     << "\n";
 	f_out << results[ProtossZealotRush].first   << "\n";
 	f_out << results[ProtossZealotRush].second  << "\n";
 	f_out << results[ProtossDarkTemplar].first  << "\n";
@@ -301,6 +312,58 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 	return doAttack || firstAttackSent;
 }
 
+const bool StrategyManager::expandProtossAirRush() const
+{
+	// if there is no place to expand to, we can't expand
+	if (MapTools::Instance().getNextExpansion() == BWAPI::TilePositions::None)
+	{
+		return false;
+	}
+
+	int numNexus =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numScouts =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+	int frame =					BWAPI::Broodwar->getFrameCount();
+
+	// if there are more than 10 idle workers, expand
+	if (WorkerManager::Instance().getNumIdleWorkers() > 10)
+	{
+		return true;
+	}
+
+	// 2nd Nexus Conditions:
+	//		We have 10 or more scouts
+	//		It is past frame 12000
+	if ((numNexus < 2) && (numScouts > 10 || frame > 12000))
+	{
+		return true;
+	}
+
+	// 3nd Nexus Conditions:
+	//		We have 20 or more scouts
+	//		It is past frame 18000
+	if ((numNexus < 3) && (numScouts > 20 || frame > 18000))
+	{
+		return true;
+	}
+
+	if ((numNexus < 4) && (numScouts > 20 || frame > 23000))
+	{
+		return true;
+	}
+
+	if ((numNexus < 5) && (numScouts > 20 || frame > 28000))
+	{
+		return true;
+	}
+
+	if ((numNexus < 6) && (numScouts > 20 || frame > 33000))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 const bool StrategyManager::expandProtossZealotRush() const
 {
 	// if there is no place to expand to, we can't expand
@@ -357,7 +420,11 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 {
 	if (BWAPI::Broodwar->self()->getRace() == BWAPI::Races::Protoss)
 	{
-		if (getCurrentStrategy() == ProtossZealotRush)
+		if (getCurrentStrategy() == ProtossAirRush)
+		{
+			return getProtossAirRushBuildOrderGoal();
+		}
+		else if (getCurrentStrategy() == ProtossZealotRush)
 		{
 			return getProtossZealotRushBuildOrderGoal();
 		}
@@ -381,6 +448,86 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 	{
 		return getZergBuildOrderGoal();
 	}
+}
+
+const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
+{
+	// the goal to return
+	MetaPairVector goal;
+
+	int numScouts =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numFleetBeacon =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon);
+	int numNexusAll =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numStargates =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Stargate);
+	int numCannons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+
+	int scoutsWanted = numScouts + numStargates;
+	int stargatesWanted = (numStargates < 2*numNexusCompleted)? numStargates + 2: numStargates;
+	int probesWanted = numProbes + 2*numNexusCompleted;
+	int cannonsWanted = numCannons + 2;
+
+	if (InformationManager::Instance().enemyHasCloakedUnits())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
+	
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
+		}
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+		}
+	}
+	else
+	{
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
+		}
+
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+		}
+	}
+
+	if (numScouts >= 10 || BWAPI::Broodwar->getFrameCount() > 11000)
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
+		if(BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) == 0)
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)); // hack so we don't get 2.. lol
+	}
+	
+	if (numNexusCompleted >= 2)
+	{
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Air_Weapons, 1));
+	}
+
+	if (numNexusCompleted >= 3)
+	{
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Air_Weapons, 1));
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 2));
+	}
+
+	if (numFleetBeacon > 0)
+	{
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Gravitic_Thrusters, 1));
+	}
+
+	if (expandProtossAirRush())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	}
+
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Scout,		 scoutsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Stargate,		 stargatesWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,		 std::min(90, probesWanted)));
+
+	return goal;
 }
 
 const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
