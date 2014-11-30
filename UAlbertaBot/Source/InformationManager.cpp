@@ -365,7 +365,15 @@ void InformationManager::getNearbyForce(std::vector<UnitInfo> & unitInfo, BWAPI:
 	FOR_EACH_UIMAP_CONST(iter, getUnitData(player).getUnits())
 	{
 		const UnitInfo & ui(iter->second);
-
+		
+		//fix: if we find a bunker estimate it as 2 marines with health of bunker
+		if (ui.type == BWAPI::UnitTypes::Terran_Bunker)
+		{
+			for (int i = 0; i < 2; ++i)
+			{
+				unitInfo.push_back(UnitInfo(BWAPI::UnitTypes::Terran_Marine.getID(),ui.unit, ui.lastPosition, BWAPI::UnitTypes::Terran_Marine));
+			}
+		}
 		// if it's a combat unit we care about
 		if (isCombatUnit(ui.type))
 		{
