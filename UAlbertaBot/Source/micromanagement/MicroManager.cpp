@@ -21,12 +21,11 @@ BWAPI::Position MicroManager::calcCenter() const
 void MicroManager::execute(const SquadOrder & inputOrder)
 {
 	// Nothing to do if we have no units
-	if(units.empty() || !(inputOrder.type == SquadOrder::Attack || inputOrder.type == SquadOrder::Defend))
-	{
-		//BWAPI::Broodwar->printf("Gots no units, fix shit up (%d)", order.type);
-		return;
-	}
-	order = inputOrder;
+	//fix: dont remove workers want to use units to kill asap/ prevent worker walls
+        //if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
+        //{
+                workersRemoved.push_back(enemyUnit);
+        //}
 	drawOrderText();
 
 	// Discover enemies within region of interest
