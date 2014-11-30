@@ -203,7 +203,8 @@ void MapGrid::GetUnits(UnitVector & units, BWAPI::Position center, int radius, b
 			}
 			if(oppUnits)
 			{
-				BOOST_FOREACH(BWAPI::Unit * unit, cell.oppUnits) if (unit->getType() != BWAPI::UnitTypes::Unknown && unit->isVisible())
+				//fix to ignore lifted enemy buildings
+				BOOST_FOREACH(BWAPI::Unit * unit, cell.oppUnits) if (unit->getType() != BWAPI::UnitTypes::Unknown && unit->isVisible() && !unit->isLifted())
 				{
 					BWAPI::Position d(unit->getPosition() - center);
 					if(d.x() * d.x() + d.y() * d.y() <= radiusSq)
