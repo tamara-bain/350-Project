@@ -25,19 +25,21 @@ void StrategyManager::addStrategies()
 	protossOpeningBook = std::vector<std::string>(NumProtossStrategies);
 	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
-
-	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 1 0 3 0 0 0 4";
+	
+	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
 	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 18 18 10 30 1 10 10 18 18 1";
-    protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
-    protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
-	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
-	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
-	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
+    protossOpeningBook[ProtossZealotRush]	= "0 0 0 1 0 3 0 4 0 4 0 4 1 4 0 3 4 0 4 4 1 0 4 4 0 3 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
+	protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
+	protossOpeningBook[ProtossShield]	= "0 0 0 1 0 3 0 4 0 4 3 0 4 4 0 1 4 4 0 4 4 9 4 4 0 4 4 0 4 4 0";
+	terranOpeningBook[TerranMarineRush]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
+	zergOpeningBook[ZergZerglingRush]	= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
 		results = std::vector<IntPair>(NumProtossStrategies);
-
+		usableStrategies.push_back(ProtossShield);
+		
 		if(BWTA::getStartLocations().size() == 2) {
 			usableStrategies.push_back(ProtossProbeRush);
 		}
@@ -101,14 +103,13 @@ void StrategyManager::readResults()
 		std::ifstream f_in(file.c_str());
 		std::string line;
 		getline(f_in, line);
-		//results[ProtossProbeRush].first = atoi(line.c_str());
-		//getline(f_in, line);
-		//results[ProtossProbeRush].second = atoi(line.c_str());
-		//getline(f_in, line);
+		results[ProtossProbeRush].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossProbeRush].second = atoi(line.c_str());
+		getline(f_in, line);
 		results[ProtossAirRush].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossAirRush].second = atoi(line.c_str());
-		f_in.close(); // Tamara is this a bug?
 		getline(f_in, line);
 		results[ProtossZealotRush].first = atoi(line.c_str());
 		getline(f_in, line);
@@ -121,6 +122,11 @@ void StrategyManager::readResults()
 		results[ProtossDragoons].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossDragoons].second = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossShield].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossShield].second = atoi(line.c_str());
+		f_in.close();
 	}
 }
 
@@ -139,7 +145,8 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossDarkTemplar].second << "\n";
 	f_out << results[ProtossDragoons].first     << "\n";
 	f_out << results[ProtossDragoons].second    << "\n";
-
+	f_out << results[ProtossShield].first		<< "\n";
+	f_out << results[ProtossShield].second		<< "\n";
 	f_out.close();
 }
 

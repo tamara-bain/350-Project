@@ -114,6 +114,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\base\BuildLearner.cpp" />
+    <ClCompile Include="..\Source\BatteryStratManager.cpp" />
     <ClCompile Include="..\Source\CombatSimulation.cpp" />
     <ClCompile Include="..\Source\micromanagement\AirManager.cpp" />
     <ClCompile Include="..\Source\MicroSearchManager.cpp" />
@@ -157,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\base\BuildLearner.h" />
+    <ClInclude Include="..\Source\BatteryStratManager.h" />
     <ClInclude Include="..\Source\CombatSimulation.h" />
     <ClInclude Include="..\Source\micromanagement\AirManager.h" />
     <ClInclude Include="..\Source\MicroSearchManager.h" />

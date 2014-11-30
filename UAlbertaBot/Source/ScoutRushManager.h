@@ -11,6 +11,7 @@ class ScoutRushManager {
 	std::set<BWAPI::Unit *>     workerScouts;
 	std::set<BWAPI::Unit *>     attackers;
 	std::map<int, bool>         scoutFleeing;
+    std::map<int, bool>         scoutMovingFromFleeing;
 	BWTA::BaseLocation *        enemyBase;
 	BWTA::BaseLocation *        ourBase;
 	BWTA::Region *              enemyRegion;
@@ -20,11 +21,16 @@ class ScoutRushManager {
 	void                        smartMove(BWAPI::Unit * scout, BWAPI::Position targetPosition);
 	void                        smartAttack(BWAPI::Unit * attacker, BWAPI::Unit * target);
 	bool                        enemyInRadius(BWAPI::Unit * scout);
+    
+    bool                        fleeingScoutInRadius(BWAPI::Unit * scout, BWAPI::Position pos);
 	BWAPI::Unit *               getLastTarget(BWAPI::Unit * scout);
 	BWAPI::Unit *               getAttacker(BWAPI::Unit * scout);
 	void                        drawDebugData();
-    int                         getAttackingWorkers();
+    int                         getAttackingWorkers(BWAPI::Unit * scout);
+    int                         getNonFleeingScouts(BWAPI::Unit * scout) ;
     BWAPI::Unit *               getFleeTarget(BWAPI::Unit * scout);
+    BWAPI::Unit *               getMineralWorker(BWAPI::Unit * scout);
+    bool                        isDoingWorkerStuff(BWAPI::Unit * unit);
 
 	void                        moveLeader(BWAPI::Unit * leader);
 	void                        moveFollowers(BWAPI::Unit * leader);
@@ -32,10 +38,10 @@ class ScoutRushManager {
 
 	BWAPI::Unit *               getEnemyGeyser();
 
-    void                        fillGroundThreats(std::vector<GroundThreat> & threats);
-    bool                        isValidFleePosition(BWAPI::Position pos);
+    void                        fillGroundThreats(std::vector<GroundThreat> & threats, BWAPI::Unit * scout);
+    bool                        isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * scout, double2 fleeVector);
     BWAPI::Position             calcFleePosition(const std::vector<GroundThreat> & threats, BWAPI::Unit * scout);
-    double2				        getFleeVector(const std::vector<GroundThreat> & threats, BWAPI::Unit * scout);
+    double2				        getFleeVector(const std::vector<GroundThreat> & threats, BWAPI::Position pos);
 
 
 public:

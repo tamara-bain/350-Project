@@ -67,7 +67,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossProbeRush=0, ProtossAirRush=1, ProtossZealotRush=2, ProtossDarkTemplar=3, ProtossDragoons=4, NumProtossStrategies=5 };
+	enum { ProtossProbeRush=0, ProtossAirRush=1, ProtossShield = 2, ProtossZealotRush=3, ProtossDarkTemplar=4, ProtossDragoons=5, NumProtossStrategies=6 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 

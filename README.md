@@ -4,13 +4,14 @@
 **General TODO:**  
 _ Fix Response to Scout Rush  
 _ Fix Response to flying buildigns  
-_ Fix Response to repairing SCVs  
+X Fix Response to repairing SCVs  
 _ Fix Searching for Enemy when Enemy base is destroyed/not found  
-_ Fix ghetto "Only attack if mining" stuff that makes my probes not attack an SCV that is attacking us (not mining) and instead attack a new miner and we lose sometimes because of this on small maps vs icebot.
+
 
 **ScoutRushManager TODO:**  
 X Add buildings to attack order
 X Return probes to Worker Manager when done  / Scout Map
+X Fix ghetto "Only attack if mining" stuff that makes my probes not attack an SCV that is attacking us (not mining) and instead attack a new miner and we lose sometimes because of this on small maps vs icebot.
 
 
 
@@ -34,5 +35,11 @@ _ Implement AirHarassmentCommander
 		_ Target tech buildings/gas  
 		_ OPTIONAL: add in corsairs w/ disruptor webs to kill turrets .. cool idea but a lot of work  
 	_ Harassment mode (When air superiority is lost, just do hit and run on resources, like Carpet Bombing)  
-		_ Add a fleet beacon and research speed tech  
+		X Add a fleet beacon and research speed tech  
 _ Figure out a way to find proxy bases faster.
+
+
+**BatteryStratManager TODO:**
+_ If possible get chokepoint position so it's at the top of the ramp/area so closer to base
+_ Try to make starting build order more efficient for this strat
+
