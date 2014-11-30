@@ -44,16 +44,14 @@ void StrategyManager::addStrategies()
 	14	= robotics facility
 	15	= robotics support bay
 	*/
-
-
-
+	
 	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
-    	protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
-	 protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
-	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
-	protossOpeningBook[ProtossShield]		= "0 0 0 1 0 3 0 4 0 4 3 4 4 0 9 0 4";
-	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
-	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
+    	protossOpeningBook[ProtossZealotRush]	= "0 0 0 1 0 3 0 4 0 4 0 4 1 4 0 3 4 0 4 4 1 0 4 4 0 3 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
+	protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
+	protossOpeningBook[ProtossShield]	= "0 0 0 1 0 3 0 4 0 4 3 0 4 4 0 1 4 4 0 4 4 9 4 4 0 4 4 0 4 4 0";
+	terranOpeningBook[TerranMarineRush]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
+	zergOpeningBook[ZergZerglingRush]	= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
@@ -135,6 +133,10 @@ void StrategyManager::readResults()
 		results[ProtossDragoons].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossDragoons].second = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossShield].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossShield].second = atoi(line.c_str());
 	}
 }
 
@@ -151,7 +153,8 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossDarkTemplar].second << "\n";
 	f_out << results[ProtossDragoons].first     << "\n";
 	f_out << results[ProtossDragoons].second    << "\n";
-
+	f_out << results[ProtossShield].first << "\n";
+	f_out << results[ProtossShield].second << "\n";
 	f_out.close();
 }
 
