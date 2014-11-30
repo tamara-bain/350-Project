@@ -27,12 +27,6 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 		return;
 	}
 	order = inputOrder;
-
-	//fix: dont remove workers want to use units to kill asap/ prevent worker walls
-        //if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
-        //{
-        //        workersRemoved.push_back(enemyUnit);
-        //}
 	drawOrderText();
 
 	// Discover enemies within region of interest
@@ -83,10 +77,10 @@ void MicroManager::execute(const SquadOrder & inputOrder)
                     BOOST_FOREACH(BWTA::Region * enemyRegion, InformationManager::Instance().getOccupiedRegions(BWAPI::Broodwar->enemy()))
                     {
                         // only add it if it's in their region
-                        if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
-                        {
+                        //if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
+                        //{
                             workersRemoved.push_back(enemyUnit);
-                        }
+                        //}
                     }
                 }
 		    }
