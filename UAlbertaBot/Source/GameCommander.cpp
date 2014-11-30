@@ -29,7 +29,7 @@ void GameCommander::update()
 
 	// combat and scouting managers
 	timerManager.startTimer(TimerManager::Combat);
-	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().ProtossShield) && combatUnits.size() < 15)
+	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossShield) && combatUnits.size() < 15)
 	{
 		batteryStratManager.update(combatUnits);
 	}
