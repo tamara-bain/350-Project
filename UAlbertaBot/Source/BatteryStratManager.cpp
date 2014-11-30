@@ -9,8 +9,6 @@ BatteryStratManager::BatteryStratManager()
 	flagBattery = false;
 	buildBattery = false;
 	numCannons = 0;
-	newx = 0;
-	newy = 0;
 	defSquad.clearSquadData();
 	batteryUnit = NULL;
 }
