@@ -10,6 +10,7 @@
 #include "ScoutManager.h"
 #include "StrategyManager.h"
 #include "ScoutRushManager.h"
+#include "BatteryStratManager.h"
 
 #include "..\..\StarcraftBuildOrderSearch\Source\starcraftsearch\Timer.hpp"
 
@@ -96,6 +97,7 @@ class GameCommander
 	CombatCommander		combatCommander;
 	ScoutManager		scoutManager;
 	ScoutRushManager    scoutRushManager;
+	BatteryStratManager  batteryStratManager;
 	TimerManager		timerManager;
 
 	std::set<BWAPI::Unit *> combatUnits;
