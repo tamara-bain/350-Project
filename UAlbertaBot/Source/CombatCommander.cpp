@@ -253,7 +253,8 @@ void CombatCommander::assignAttackVisibleUnits(std::set<BWAPI::Unit *> & unitsTo
 
 	BOOST_FOREACH (BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
 	{
-		if (unit->isVisible())
+		//fix to ignore lifted buildings
+		if (unit->isVisible() && !unit->isLifted())
 		{
 			UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 			unitsToAssign.clear();
@@ -272,7 +273,8 @@ void CombatCommander::assignAttackKnownBuildings(std::set<BWAPI::Unit *> & units
 	FOR_EACH_UIMAP_CONST (iter, InformationManager::Instance().getUnitInfo(BWAPI::Broodwar->enemy()))
 	{
 		const UnitInfo ui(iter->second);
-		if(ui.type.isBuilding())
+		//fix to ignore lifted buildings
+		if(ui.type.isBuilding() && !ui.unit->isLifted())
 		{
 			UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 			unitsToAssign.clear();
