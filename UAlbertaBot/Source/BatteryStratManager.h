@@ -11,6 +11,7 @@
 #include "SquadData.h"
 #include "SquadOrder.h"
 
+
 class BatteryStratManager {
 
 	BWTA::Chokepoint *			wallChokepoint;
@@ -18,6 +19,7 @@ class BatteryStratManager {
 	bool						haveBattery;
 	bool						flagBattery;
 	int							numCannons;
+	int							numForge;
 	SquadData					defSquad;
 	BWAPI::Unit	*				batteryUnit;
 
@@ -27,6 +29,5 @@ public:
 	~BatteryStratManager() {};
 	void				update(const std::set<BWAPI::Unit *> & defenseUnits);
 	BWTA::Chokepoint *	getNearestChokepoint();
-	void				workerScoutDefense();
 	void				customBuild(BWAPI::UnitType b);
 };
