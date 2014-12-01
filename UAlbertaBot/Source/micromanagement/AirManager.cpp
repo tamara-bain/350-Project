@@ -76,12 +76,12 @@ void AirManager::kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 		return;
 	}
 
-	double		minDist(64);
+	double		minDist(24);
 	bool		kite(true);
 	double		dist(airUnit->getDistance(target));
 	double		speed(airUnit->getType().topSpeed());
 
-	double	timeToEnter = std::max(0.0,(dist - range) / speed); // This is pretty broken, since scouts have acceleration. FIX ME!
+	double	timeToEnter = std::max(0.0,(dist - range) / (speed/2)); // This is pretty broken, since scouts have acceleration. FIX ME!
 	
 	if(!target->getType().isFlyer())
 	{
@@ -176,25 +176,26 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 
 	bool canAttackUs = targetType.airWeapon() != BWAPI::WeaponTypes::None;
 
+	// Take out repairing workers first!
 	if(target->isRepairing())
 	{
-		return 8;
+		return 10;
 	}
 
-	// highest priority is air defense structures
+	// second highest priority is air defense structures
 	if(targetType ==  BWAPI::UnitTypes::Zerg_Spore_Colony     || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Missile_Turret || 
 	   targetType ==  BWAPI::UnitTypes::Protoss_Photon_Cannon || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Bunker)
 	{
-		return 7;
+		return 9;
 	}
-	// second highest priority is something that can attack us or aid in combat
+	// third highest priority is something that can attack us or aid in combat
 	else if (targetType == BWAPI::UnitTypes::Terran_Medic   || 
 			 targetType == BWAPI::UnitTypes::Terran_Goliath ||
 			 canAttackUs) 
 	{
-		return 6;
+		return 8;
 	}
 	// next priority is worker
 	else if (targetType.isWorker()) 
@@ -206,21 +207,35 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 			if( beingBuilt && (beingBuilt->getType() == BWAPI::UnitTypes::Terran_Armory ||
 				beingBuilt->getType() == BWAPI::UnitTypes::Terran_Missile_Turret)) 
 			{
-				return 5;
+				return 7;
 			}
 			
-			return 4;
+			return 6;
 			
 		}
 		
+		return 5;
+	}
+	// Target gas income
+	else if (targetType == BWAPI::UnitTypes::Protoss_Assimilator ||
+			 targetType == BWAPI::UnitTypes::Terran_Refinery     ||
+			 targetType == BWAPI::UnitTypes::Zerg_Extractor)
+	{
+		return 4;
+	}
+	// target supply line
+	else if(targetType == BWAPI::UnitTypes::Zerg_Overlord		||
+			targetType == BWAPI::UnitTypes::Terran_Supply_Depot ||
+			targetType == BWAPI::UnitTypes::Protoss_Pylon)
+	{
 		return 3;
 	}
-	// then everything else
 	// next is buildings that cost gas
 	else if (targetType.gasPrice() > 0)
 	{
 		return 2;
 	}
+	// then everything else
 	else 
 	{
 		return 1;
