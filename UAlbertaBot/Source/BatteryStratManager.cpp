@@ -33,7 +33,7 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 			if (found->getPlayer() == BWAPI::Broodwar->self())
 			{
 				//set unit/flags for built shield battery
-				if (found->getType() == BWAPI::UnitTypes::Protoss_Shield_Battery)
+				if (found->getType() == BWAPI::UnitTypes::Protoss_Shield_Battery && found->isCompleted())
 				{
 					haveBattery = true;
 					flagBattery = true;
@@ -67,9 +67,16 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 
 	//manage defense units by either defending chokepoint or going to shield battery for recharge
 	BOOST_FOREACH(BWAPI::Unit * found, defenseUnits) {
-		if (found->getShields() < RECHARGE_THRESHOLD && haveBattery && batteryUnit->getEnergy() > BATTERY_THRESHOLD)
+		if (found->getShields() < RECHARGE_THRESHOLD && haveBattery)
 		{
-			found->follow(batteryUnit);
+			if (batteryUnit->getEnergy() > BATTERY_THRESHOLD)
+			{
+				found->follow(batteryUnit);
+			}
+			else
+			{
+				newSquad.push_back(found);
+			}			
 		}
 		else
 		{
