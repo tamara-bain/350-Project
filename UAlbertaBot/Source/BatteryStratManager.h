@@ -22,6 +22,14 @@ class BatteryStratManager {
 	int							numForge;
 	SquadData					defSquad;
 	BWAPI::Unit	*				batteryUnit;
+	
+	static const int			BASE_SHIFT = 200;
+	static const int			RECHARGE_THRESHOLD = 25;
+	static const int			BATTERY_THRESHOLD = 10;
+	static const int			CANNON_LIMIT = 5;
+
+	static const int			FRAME_START = 5000;
+	static const int			BUILD_FREQ = 48;
 
 public:
 
