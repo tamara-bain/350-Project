@@ -24,10 +24,10 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 	numCannons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	numForge = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge);
 	flagBattery = false;
-	batteryUnit = NULL;
 
 	//start the custom building for battery strategy after a set time, checks every 2s for update to reduce load
-	if (BWAPI::Broodwar->getFrameCount() >= FRAME_START && (BWAPI::Broodwar->getFrameCount() % BUILD_FREQ == 0))
+	//&& (BWAPI::Broodwar->getFrameCount() % BUILD_FREQ == 0)
+	if (BWAPI::Broodwar->getFrameCount() >= FRAME_START)
 	{
 		BOOST_FOREACH(BWAPI::Unit * found, BWAPI::Broodwar->getAllUnits()) {
 			if (found->getPlayer() == BWAPI::Broodwar->self())
@@ -46,6 +46,7 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 		if (!flagBattery)
 		{
 			haveBattery = false;
+			batteryUnit = NULL;
 		}
 
 		//no battery built yet try to build near chokepoint
@@ -71,7 +72,11 @@ void BatteryStratManager::update(const std::set<BWAPI::Unit *> & defenseUnits)
 		{
 			if (batteryUnit->getEnergy() > BATTERY_THRESHOLD)
 			{
-				found->follow(batteryUnit);
+				//send follow command to Shield Battery every .5s
+				if (BWAPI::Broodwar->getFrameCount() % 12 == 0)
+				{
+					found->follow(batteryUnit);
+				}				
 			}
 			else
 			{
