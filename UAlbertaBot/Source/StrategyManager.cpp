@@ -100,7 +100,7 @@ void StrategyManager::readResults()
     std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
 
     // if the file doesn't exist, set the results to zeros
-	if (stat(file.c_str(), &buf) == -1) {
+	if (stat(scoutfile.c_str(), &buf) == -1) {
 		std::fill(proberesults.begin(), results.end(), IntPair(0,0));
 	}
 	else {
