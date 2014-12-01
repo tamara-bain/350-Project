@@ -101,7 +101,7 @@ void StrategyManager::readResults()
 
     // if the file doesn't exist, set the results to zeros
 	if (stat(scoutfile.c_str(), &buf) == -1) {
-		std::fill(proberesults.begin(), results.end(), IntPair(0,0));
+		std::fill(proberesults.begin(), proberesults.end(), IntPair(0,0));
 	}
 	else {
 		std::ifstream f_in(file.c_str());
@@ -110,7 +110,6 @@ void StrategyManager::readResults()
 		proberesults[ProtossProbeRush].first = atoi(line.c_str());
 		getline(f_in, line);
 		proberesults[ProtossProbeRush].second = atoi(line.c_str());
-        f_in.close();
     }
 
 	// if the file doesn't exist, set the results to zeros

@@ -52,6 +52,7 @@ namespace Options
 
 	namespace Debug
 	{
+        extern bool DRAW_SCOUTRUSH_DEBUG;				// draws debug information for UAlbertaBot
 		extern bool DRAW_UALBERTABOT_DEBUG;				// draws debug information for UAlbertaBot
 		extern bool DRAW_DEBUG_INTERFACE;				// draws debug information for EnhancedUI
 

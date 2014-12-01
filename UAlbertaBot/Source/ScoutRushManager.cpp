@@ -171,7 +171,7 @@ void ScoutRushManager::allInAttack() {
             BWAPI::Position pos = scout->getPosition();
 			BWAPI::Position fleeTo = calcFleePosition(groundThreats, scout);
 
-            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) BWAPI::Broodwar->drawLineMap(pos.x(), pos.y(), fleeTo.x(), fleeTo.y(), BWAPI::Colors::Red);
+            if (Options::Debug::DRAW_SCOUTRUSH_DEBUG) BWAPI::Broodwar->drawLineMap(pos.x(), pos.y(), fleeTo.x(), fleeTo.y(), BWAPI::Colors::Cyan);
             smartMove(scout, fleeTo);
             continue;
 		}
@@ -494,14 +494,14 @@ void ScoutRushManager::smartAttack(BWAPI::Unit * attacker, BWAPI::Unit * target)
 
 void ScoutRushManager::drawDebugData() {
 
-    if (!Options::Debug::DRAW_UALBERTABOT_DEBUG) 
+    if (!Options::Debug::DRAW_SCOUTRUSH_DEBUG) 
         return;
 
     BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
         int x = scout->getPosition().x();
         int y = scout->getPosition().y();
 
-        BWAPI::Broodwar->drawCircleMap(enemyBase->getPosition().x(), enemyBase->getPosition().y(), 300, BWAPI::Colors::Red);
+        //BWAPI::Broodwar->drawCircleMap(enemyBase->getPosition().x(), enemyBase->getPosition().y(), 300, BWAPI::Colors::Red);
 
 
         BWAPI::Unit * target = scout->getTarget();
@@ -510,22 +510,22 @@ void ScoutRushManager::drawDebugData() {
             int tx = target->getPosition().x();
             int ty = target->getPosition().y();
 
-            if (scout->isInWeaponRange(target)) {
-                BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Red, false);
-            }
-            else {
-                 BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Yellow, false);
-            }
+            //if (scout->isInWeaponRange(target)) {
+            //    BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Red, false);
+            //}
+            //else {
+            //     BWAPI::Broodwar->drawCircleMap(x, y, scout->getType().groundWeapon().maxRange(), BWAPI::Colors::Yellow, false);
+            //}
         }
 
         if (scout -> isStuck()) {
-             BWAPI::Broodwar->drawTextMap(x, y, "Stuck!!!");
+             //BWAPI::Broodwar->drawTextMap(x, y, "Stuck!!!");
         }
 
 	    else if(scoutFleeing[scout->getID()] == true) {
 	        BWAPI::Broodwar->drawTextMap(x, y, "Fleeing!");
-            BWAPI::Broodwar->drawCircleMap(x, y, 200, BWAPI::Colors::Green, false);
-            BWAPI::Broodwar->drawCircleMap(x, y, 100, BWAPI::Colors::Purple, false);
+            BWAPI::Broodwar->drawCircleMap(x, y, 200, BWAPI::Colors::Purple, false);
+            //BWAPI::Broodwar->drawCircleMap(x, y, 100, BWAPI::Colors::Purple, false);
         }
 
         else if(scoutMovingFromFleeing[scout->getID()] == true) {
@@ -658,7 +658,7 @@ bool ScoutRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * sc
     }
 
 	int geyserDist = 16;
-	int mineralDist = 8;
+	int mineralDist = 16;
     int baseDist = 90;
 
 	BWTA::BaseLocation * enemyLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
@@ -695,15 +695,15 @@ bool ScoutRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * sc
     checkIfNarrow2.normalise();
     checkIfNarrow3.normalise();
     BWAPI::Position scoutPos = scout->getPosition();
-    BWAPI::Position test2(scoutPos  + checkIfNarrow2 * 250);
-    BWAPI::Position test3(scoutPos  + checkIfNarrow3 * 250);
+    BWAPI::Position test2(scoutPos  + checkIfNarrow2 * 200);
+    BWAPI::Position test3(scoutPos  + checkIfNarrow3 * 200);
 
 	if (BWTA::getRegion(BWAPI::TilePosition(test2)) != enemyRegion &&
         BWTA::getRegion(BWAPI::TilePosition(test3)) != enemyRegion) {
-            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) {
+            if (Options::Debug::DRAW_SCOUTRUSH_DEBUG) {
                 BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test2.x(), test2.y(), BWAPI::Colors::Red);
                 BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test3.x(), test3.y(), BWAPI::Colors::Red);
-                BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), pos.x(), pos.y(), BWAPI::Colors::Green);
+                //BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), pos.x(), pos.y(), BWAPI::Colors::Green);
             }
         return false;
     }
