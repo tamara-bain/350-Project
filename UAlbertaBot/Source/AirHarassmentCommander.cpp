@@ -11,7 +11,7 @@ AirHarassmentCommander::AirHarassmentCommander()
 
 bool AirHarassmentCommander::squadUpdateFrame()
 {
-	return BWAPI::Broodwar->getFrameCount() % 24 == 0;
+	return BWAPI::Broodwar->getFrameCount() % 11 == 0;
 }
 
 void AirHarassmentCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
@@ -46,8 +46,8 @@ void AirHarassmentCommander::assignHarassmentSquads(std::set<BWAPI::Unit *> & un
 		assignBaseAssault(unitsToAssign);				// assault main base to maintain air superiority
 		// fallback strategies
 		assignAttackRegion(unitsToAssign);				// attack occupied enemy region
-		assignAttackKnownBuildings(unitsToAssign);		// attack known enemy buildings
 		assignAttackVisibleUnits(unitsToAssign);		// attack visible enemy units
+		assignAttackKnownBuildings(unitsToAssign);		// attack known enemy buildings
 		assignAttackExplore(unitsToAssign);				// attack and explore for unknown units
 
 }
@@ -62,17 +62,19 @@ void AirHarassmentCommander::assignBaseAssault(std::set<BWAPI::Unit *> & unitsTo
 
 	if (enemyBase && enemyRegion->getCenter().isValid()) 
 	{
-		//UnitVector oppUnitsInArea, ourUnitsInArea;
-		//MapGrid::Instance().GetUnits(oppUnitsInArea, enemyRegion->getCenter(), 800, false, true);
-		//MapGrid::Instance().GetUnits(ourUnitsInArea, enemyRegion->getCenter(), 200, true, false);
 
-		//if (!oppUnitsInArea.empty())
-		//{
+		UnitVector oppUnitsInArea, ourUnitsInArea;
+		MapGrid::Instance().GetUnits(oppUnitsInArea, enemyRegion->getCenter(), 800, false, true);
+		MapGrid::Instance().GetUnits(ourUnitsInArea, enemyRegion->getCenter(), 200, true, false);
+		
+		// Early game air rush
+		if (BWAPI::Broodwar->getFrameCount() < 15000 || !oppUnitsInArea.empty())
+		{
 			UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 			unitsToAssign.clear();
 
 			squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::BaseAssault, enemyRegion->getCenter(), 1500, "Base Assault")));
-		//}
+		}
 	}
 
 }
@@ -144,8 +146,7 @@ void AirHarassmentCommander::assignAttackKnownBuildings(std::set<BWAPI::Unit *> 
 	FOR_EACH_UIMAP_CONST (iter, InformationManager::Instance().getUnitInfo(BWAPI::Broodwar->enemy()))
 	{
 		const UnitInfo ui(iter->second);
-		//fix to ignore lifted buildings
-		if(ui.type.isBuilding() && !ui.unit->isLifted())
+		if(ui.type.isBuilding())
 		{
 			UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 			unitsToAssign.clear();

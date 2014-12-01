@@ -164,8 +164,13 @@ void MicroManager::smartAttackUnit(BWAPI::Unit * attacker, BWAPI::Unit * target)
 	assert(attacker && target);
 
 	// if we have issued a command to this unit already this frame, ignore this one
-	if (attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || attacker->isAttackFrame())
+	if (attacker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount())
 	{
+		return;
+	}
+
+	// hack, isAttackFrame bugs out Scouts
+	if(attacker->getType() != BWAPI::UnitTypes::Protoss_Scout && attacker->isAttackFrame()) {
 		return;
 	}
 
@@ -199,6 +204,11 @@ void MicroManager::smartAttackMove(BWAPI::Unit * attacker, BWAPI::Position targe
 		return;
 	}
 
+	//// hack, isAttackFrame bugs out Scouts
+	if(attacker->getType() != BWAPI::UnitTypes::Protoss_Scout && attacker->isAttackFrame()) {
+		return;
+	}
+
 	// get the unit's current command
 	BWAPI::UnitCommand currentCommand(attacker->getLastCommand());
 
@@ -216,6 +226,7 @@ void MicroManager::smartAttackMove(BWAPI::Unit * attacker, BWAPI::Position targe
 									BWAPI::Colors::Orange );
 }
 
+
 void MicroManager::smartMove(BWAPI::Unit * attacker, BWAPI::Position targetPosition) const
 {
 	assert(attacker);
@@ -228,6 +239,11 @@ void MicroManager::smartMove(BWAPI::Unit * attacker, BWAPI::Position targetPosit
 			BWAPI::Broodwar->printf("Attack Frame");
 		}
 		return;
+	}
+
+	// //hack, isAttackFrame bugs out Scouts
+	if(attacker->getType() != BWAPI::UnitTypes::Protoss_Scout && attacker->isAttackFrame()) {
+		
 	}
 
 	// get the unit's current command

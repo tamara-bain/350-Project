@@ -12,7 +12,9 @@ void AirManager::executeMicro(const UnitVector & targets)
 	for (size_t i(0); i<targets.size(); i++) 
 	{
 		// conditions for targeting
-		if (targets[i]->isVisible()) 
+		if (targets[i]->isVisible() &&
+		   !(targets[i]->getType() == BWAPI::UnitTypes::Zerg_Larva) && 
+		   !(targets[i]->getType() == BWAPI::UnitTypes::Zerg_Egg)) 
 		{
 			airUnitTargets.push_back(targets[i]);
 		}
@@ -40,7 +42,15 @@ void AirManager::executeMicro(const UnitVector & targets)
 				// if we're not near the order position
 				if (airUnit->getDistance(order.position) > 100)
 				{
-					smartAttackMove(airUnit, order.position);
+					if(BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Scout) < 3)
+					{
+						// need to get to the base quick to maintain air superiority
+						smartMove(airUnit, order.position);
+					}
+					else 
+					{
+						smartAttackMove(airUnit, order.position);
+					}
 				}
 			}
 		}
@@ -166,19 +176,18 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 
 	bool canAttackUs = targetType.airWeapon() != BWAPI::WeaponTypes::None;
 
+	if(target->isRepairing())
+	{
+		return 8;
+	}
+
 	// highest priority is air defense structures
 	if(targetType ==  BWAPI::UnitTypes::Zerg_Spore_Colony     || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Missile_Turret || 
 	   targetType ==  BWAPI::UnitTypes::Protoss_Photon_Cannon || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Bunker)
 	{
-		if(target->isBeingConstructed()) {
-			return 4;
-		}
-		else
-		{
-			return 7;
-		}
+		return 7;
 	}
 	// second highest priority is something that can attack us or aid in combat
 	else if (targetType == BWAPI::UnitTypes::Terran_Medic   || 
@@ -191,7 +200,7 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 	else if (targetType.isWorker()) 
 	{
 		// prevent buildings from being constructed/repaired
-		if(target->isConstructing() || target->isRepairing()) 
+		if(target->isConstructing()) 
 		{
 			BWAPI::Unit * beingBuilt = target->getBuildUnit();
 			if( beingBuilt && (beingBuilt->getType() == BWAPI::UnitTypes::Terran_Armory ||
@@ -199,11 +208,19 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 			{
 				return 5;
 			}
+			
 			return 4;
+			
 		}
+		
 		return 3;
 	}
 	// then everything else
+	// next is buildings that cost gas
+	else if (targetType.gasPrice() > 0)
+	{
+		return 2;
+	}
 	else 
 	{
 		return 1;

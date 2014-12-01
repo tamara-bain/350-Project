@@ -27,7 +27,7 @@ void StrategyManager::addStrategies()
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 	
 	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
-	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 18 18 10 30 1 10 10 18 18 1";
+	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 3 18 18 4 4 4 30 1 10 18 18 1 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 1 0 3 0 4 0 4 0 4 1 4 0 3 4 0 4 4 1 0 4 4 0 3 4 4 4 1 0 4 4 4";
 	protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
 	protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
@@ -332,15 +332,15 @@ const bool StrategyManager::expandProtossAirRush() const
 	int frame =					BWAPI::Broodwar->getFrameCount();
 
 	// if there are more than 10 idle workers, expand
-	if (WorkerManager::Instance().getNumIdleWorkers() > 10)
-	{
-		return true;
-	}
+	//if (WorkerManager::Instance().getNumIdleWorkers() > 10)
+	//{
+	//	return true;
+	//}
 
 	// 2nd Nexus Conditions:
 	//		We have 10 or more scouts
 	//		It is past frame 12000
-	if ((numNexus < 2) && (numScouts > 10 || frame > 18000))
+	if ((numNexus < 2) && (numScouts > 10))
 	{
 		return true;
 	}
@@ -348,7 +348,7 @@ const bool StrategyManager::expandProtossAirRush() const
 	// 3nd Nexus Conditions:
 	//		We have 20 or more scouts
 	//		It is past frame 18000
-	if ((numNexus < 3) && (numScouts > 20 || frame > 21000))
+	if ((numNexus < 3) && (numScouts > 12 && frame > 21000))
 	{
 		return true;
 	}
@@ -463,6 +463,7 @@ const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
 	MetaPairVector goal;
 
 	int numScouts =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+	int numZealots =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
 	int numProbes =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
 	int numNexusCompleted =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
 	int numFleetBeacon =		BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon);
@@ -471,9 +472,10 @@ const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
 	int numCannons =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 
 	int scoutsWanted = numScouts + numStargates;
+	int numZealotsWanted = numZealots + 2*numNexusCompleted;
 	int stargatesWanted = (numStargates < 2*numNexusCompleted)? numStargates + 2: numStargates;
-	int probesWanted = numProbes + 2*numNexusCompleted;
-	int cannonsWanted = numCannons + 2;
+	int probesWanted = numProbes + 1*numNexusCompleted;
+	//int cannonsWanted = numCannons + 2;
 
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
@@ -510,11 +512,13 @@ const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
 	
 	if (numNexusCompleted >= 2)
 	{
+		numZealotsWanted +=2;
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Air_Weapons, 1));
 	}
 
 	if (numNexusCompleted >= 3)
 	{
+		numZealotsWanted +=2;
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Air_Weapons, 1));
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 2));
 	}
@@ -530,7 +534,8 @@ const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
 	}
 
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Scout,		 scoutsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot,		 numZealotsWanted));
+	//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Stargate,		 stargatesWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,		 std::min(90, probesWanted)));
 
