@@ -366,10 +366,10 @@ void InformationManager::getNearbyForce(std::vector<UnitInfo> & unitInfo, BWAPI:
 	{
 		const UnitInfo & ui(iter->second);
 		
-		//fix: if we find a bunker estimate it as 2 marines with health of bunker
+		//fix: if we find a bunker estimate it as 4 marines with health of bunker
 		if (ui.type == BWAPI::UnitTypes::Terran_Bunker)
 		{
-			for (int i = 0; i < 2; ++i)
+			for (int i = 0; i < 4; ++i)
 			{
 				unitInfo.push_back(UnitInfo(BWAPI::UnitTypes::Terran_Marine.getID(),ui.unit, ui.lastPosition, BWAPI::UnitTypes::Terran_Marine));
 			}

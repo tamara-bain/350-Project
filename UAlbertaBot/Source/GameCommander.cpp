@@ -35,6 +35,8 @@ void GameCommander::update()
 	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossShield) && combatUnits.size() < 15)
 	{
 		batteryStratManager.update(combatUnits);
+		std::set<BWAPI::Unit*> emptyUnits;
+		combatCommander.update(emptyUnits);
 	}
 	else if (Options::Modules::USING_COMBATCOMMANDER)
 	{

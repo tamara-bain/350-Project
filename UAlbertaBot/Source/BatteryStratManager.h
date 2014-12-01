@@ -24,7 +24,7 @@ class BatteryStratManager {
 	BWAPI::Unit	*				batteryUnit;
 	
 	static const int			BASE_SHIFT = 200;
-	static const int			RECHARGE_THRESHOLD = 25;
+	static const int			RECHARGE_THRESHOLD = 20;
 	static const int			BATTERY_THRESHOLD = 10;
 	static const int			CANNON_LIMIT = 5;
 
