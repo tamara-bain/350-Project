@@ -11,6 +11,7 @@
 #include "StrategyManager.h"
 #include "ScoutRushManager.h"
 #include "BatteryStratManager.h"
+#include "AirHarassmentCommander.h"
 
 #include "..\..\StarcraftBuildOrderSearch\Source\starcraftsearch\Timer.hpp"
 
@@ -94,13 +95,15 @@ public:
 
 class GameCommander 
 {
-	CombatCommander		combatCommander;
-	ScoutManager		scoutManager;
-	ScoutRushManager    scoutRushManager;
-	BatteryStratManager  batteryStratManager;
-	TimerManager		timerManager;
+	CombatCommander			combatCommander;
+	AirHarassmentCommander  airHarassmentCommander;
+	ScoutManager			scoutManager;
+	ScoutRushManager		scoutRushManager;
+	BatteryStratManager		batteryStratManager;
+	TimerManager			timerManager;
 
 	std::set<BWAPI::Unit *> combatUnits;
+	std::set<BWAPI::Unit *> airHarassmentUnits;
 	std::set<BWAPI::Unit *> scoutUnits;
 	std::set<BWAPI::Unit *> workerUnits;
 
@@ -123,12 +126,14 @@ public:
 	void setScoutUnits();
 	void setScoutRushUnits();
 	void setWorkerUnits();
+	void setAirHarassmentUnits();
 	void setCombatUnits();
 
 	void drawDebugInterface();
 
 	bool isValidUnit(BWAPI::Unit * unit);
 	bool isCombatUnit(BWAPI::Unit * unit) const;
+	bool isAirCombatUnit(BWAPI::Unit * unit) const;
 
 	BWAPI::Unit * getFirstSupplyProvider();
 	BWAPI::Unit * getClosestUnitToTarget(BWAPI::UnitType type, BWAPI::Position target);

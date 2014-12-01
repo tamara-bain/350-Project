@@ -21,7 +21,7 @@ BWAPI::Position MicroManager::calcCenter() const
 void MicroManager::execute(const SquadOrder & inputOrder)
 {
 	// Nothing to do if we have no units
-	if(units.empty() || !(inputOrder.type == SquadOrder::Attack || inputOrder.type == SquadOrder::Defend))
+	if(units.empty() || !(inputOrder.type == SquadOrder::Attack || inputOrder.type == SquadOrder::Defend || inputOrder.type == SquadOrder::BaseAssault))
 	{
 		//BWAPI::Broodwar->printf("Gots no units, fix shit up (%d)", order.type);
 		return;
@@ -37,7 +37,13 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	{
 		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 	
-	} // otherwise we want to see everything on the way
+	} 
+
+	if(order.type == order.BaseAssault) {
+		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 1500, false, true);
+	}
+
+	// otherwise we want to see everything on the way
 	else if (order.type == order.Attack) 
 	{
 		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
@@ -88,7 +94,10 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 		    // Allow micromanager to handle enemies
 		    executeMicro(workersRemoved);
         }
-	}	
+	}
+	else if(order.type == order.BaseAssault) { 
+		executeMicro(nearbyEnemies);
+	}
 }
 
 void MicroManager::regroup(const BWAPI::Position & regroupPosition) const

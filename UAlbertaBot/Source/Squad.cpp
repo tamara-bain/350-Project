@@ -173,12 +173,12 @@ bool Squad::needsToRegroup()
 		return false;
 	}
 
-	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush &&
-		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))
-	{
-		regroupStatus = std::string("\x04 Protoss Air rush");
-		return false;
-	}
+	//if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush &&
+	//	(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Scout) == 0))
+	//{
+	//	regroupStatus = std::string("\x04 Protoss Air rush");
+	//	return false;
+	//}
 
 	BWAPI::Unit * unitClosest = unitClosestToEnemy();
 

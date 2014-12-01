@@ -340,7 +340,7 @@ const bool StrategyManager::expandProtossAirRush() const
 	// 2nd Nexus Conditions:
 	//		We have 10 or more scouts
 	//		It is past frame 12000
-	if ((numNexus < 2) && (numScouts > 10 || frame > 12000))
+	if ((numNexus < 2) && (numScouts > 10 || frame > 18000))
 	{
 		return true;
 	}
@@ -348,22 +348,22 @@ const bool StrategyManager::expandProtossAirRush() const
 	// 3nd Nexus Conditions:
 	//		We have 20 or more scouts
 	//		It is past frame 18000
-	if ((numNexus < 3) && (numScouts > 20 || frame > 18000))
+	if ((numNexus < 3) && (numScouts > 20 || frame > 21000))
 	{
 		return true;
 	}
 
-	if ((numNexus < 4) && (numScouts > 20 || frame > 23000))
+	if ((numNexus < 4) && (numScouts > 20 || frame > 25000))
 	{
 		return true;
 	}
 
-	if ((numNexus < 5) && (numScouts > 20 || frame > 28000))
+	if ((numNexus < 5) && (numScouts > 20 || frame > 32000))
 	{
 		return true;
 	}
 
-	if ((numNexus < 6) && (numScouts > 20 || frame > 33000))
+	if ((numNexus < 6) && (numScouts > 20 || frame > 38000))
 	{
 		return true;
 	}

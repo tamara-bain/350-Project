@@ -6,7 +6,7 @@ class SquadOrder
 {
 public:
 
-	enum { None, Attack, Defend, Regroup, SquadOrderTypes };
+	enum { None, Attack, Defend, Regroup, SquadOrderTypes, BaseAssault };
 
 	int					type;
 	BWAPI::Position		position;

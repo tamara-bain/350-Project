@@ -22,7 +22,7 @@ void AirManager::executeMicro(const UnitVector & targets)
 	BOOST_FOREACH(BWAPI::Unit * airUnit, airUnits)
 	{
 		// if the order is to attack or defend
-		if (order.type == order.Attack || order.type == order.Defend) {
+		if (order.type == order.Attack || order.type == order.Defend || order.type == order.BaseAssault) {
 
 			// if there are targets
 			if (!airUnitTargets.empty())
@@ -40,7 +40,6 @@ void AirManager::executeMicro(const UnitVector & targets)
 				// if we're not near the order position
 				if (airUnit->getDistance(order.position) > 100)
 				{
-					// move to it
 					smartAttackMove(airUnit, order.position);
 				}
 			}
@@ -165,28 +164,45 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 	BWAPI::UnitType airUnitType = airUnit->getType();
 	BWAPI::UnitType targetType = target->getType();
 
-	bool canAttackUs = airUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
+	bool canAttackUs = targetType.airWeapon() != BWAPI::WeaponTypes::None;
 
-	
-	bool isAirDefense = false;
 	// highest priority is air defense structures
-	if(targetType == BWAPI::UnitTypes::Zerg_Spore_Colony || 
-	   targetType == BWAPI::UnitTypes::Terran_Missile_Turret || 
-	   targetType == BWAPI::UnitTypes::Protoss_Photon_Cannon || 
+	if(targetType ==  BWAPI::UnitTypes::Zerg_Spore_Colony     || 
+	   targetType ==  BWAPI::UnitTypes::Terran_Missile_Turret || 
+	   targetType ==  BWAPI::UnitTypes::Protoss_Photon_Cannon || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Bunker)
 	{
-		return 4;
+		if(target->isBeingConstructed()) {
+			return 4;
+		}
+		else
+		{
+			return 7;
+		}
 	}
 	// second highest priority is something that can attack us or aid in combat
-	else if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs) 
+	else if (targetType == BWAPI::UnitTypes::Terran_Medic   || 
+			 targetType == BWAPI::UnitTypes::Terran_Goliath ||
+			 canAttackUs) 
 	{
-		return 3;
+		return 6;
 	}
 	// next priority is worker
 	else if (targetType.isWorker()) 
 	{
-		return 2;
-	} 
+		// prevent buildings from being constructed/repaired
+		if(target->isConstructing() || target->isRepairing()) 
+		{
+			BWAPI::Unit * beingBuilt = target->getBuildUnit();
+			if( beingBuilt && (beingBuilt->getType() == BWAPI::UnitTypes::Terran_Armory ||
+				beingBuilt->getType() == BWAPI::UnitTypes::Terran_Missile_Turret)) 
+			{
+				return 5;
+			}
+			return 4;
+		}
+		return 3;
+	}
 	// then everything else
 	else 
 	{

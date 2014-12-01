@@ -29,6 +29,9 @@ void GameCommander::update()
 
 	// combat and scouting managers
 	timerManager.startTimer(TimerManager::Combat);
+	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush) {
+		airHarassmentCommander.update(airHarassmentUnits);
+	}
 	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossShield) && combatUnits.size() < 15)
 	{
 		batteryStratManager.update(combatUnits);
@@ -100,6 +103,10 @@ void GameCommander::populateUnitVectors()
 
 	// set each type of unit
 	setScoutUnits();
+	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush) 
+	{
+		setAirHarassmentUnits();
+	}
 	setCombatUnits();
 	setWorkerUnits();
 }
@@ -236,6 +243,40 @@ bool GameCommander::isCombatUnit(BWAPI::Unit * unit) const
 		return true;
 	}
 		
+	return false;
+}
+
+// sets combat units to be passed to AirHarassmentCommander
+void GameCommander::setAirHarassmentUnits()
+{
+	airHarassmentUnits.clear();
+
+	BOOST_FOREACH (BWAPI::Unit * unit, validUnits)
+	{
+		if (!isAssigned(unit) && isAirCombatUnit(unit))		
+		{	
+			airHarassmentUnits.insert(unit);
+			assignedUnits.insert(unit);
+		}
+	}
+}
+
+bool GameCommander::isAirCombatUnit(BWAPI::Unit * unit) const {
+	assert(unit != NULL);
+
+	// We want flying attackers for harassment
+	if(unit->getType().isFlyer() && unit->getType().canAttack())
+	{
+		return true;
+	}
+
+	// If they have cloakers, then we probably need a flying eyeball
+	if(InformationManager::Instance().enemyHasCloakedUnits() && 
+	   unit->getType() == BWAPI::UnitTypes::Protoss_Observer)
+	{
+		return true;
+	}
+
 	return false;
 }
 
