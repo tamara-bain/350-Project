@@ -32,11 +32,11 @@ void GameCommander::update()
 	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush) {
 		airHarassmentCommander.update(airHarassmentUnits);
 	}
-	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossShield) && combatUnits.size() < 15)
-	{
-		batteryStratManager.update(combatUnits);
-	}
-	else if (Options::Modules::USING_COMBATCOMMANDER)
+	//if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossShield) && combatUnits.size() < 15)
+	//{
+	//	batteryStratManager.update(combatUnits);
+	//}
+	if (Options::Modules::USING_COMBATCOMMANDER)
 	{
 		combatCommander.update(combatUnits);
 	}

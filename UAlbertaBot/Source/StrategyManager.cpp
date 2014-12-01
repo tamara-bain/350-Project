@@ -30,15 +30,15 @@ void StrategyManager::addStrategies()
 	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 3 18 18 4 4 4 30 1 10 18 18 1 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 1 0 3 0 4 0 4 0 4 1 4 0 3 4 0 4 4 1 0 4 4 0 3 4 4 4 1 0 4 4 4";
 	protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
-	protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
-	protossOpeningBook[ProtossShield]	= "0 0 0 1 0 3 0 4 0 4 3 0 4 4 0 1 4 4 0 4 4 9 4 4 0 4 4 0 4 4 0";
+	//protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
+	//protossOpeningBook[ProtossShield]	= "0 0 0 1 0 3 0 4 0 4 3 0 4 4 0 1 4 4 0 4 4 9 4 4 0 4 4 0 4 4 0";
 	terranOpeningBook[TerranMarineRush]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
 	zergOpeningBook[ZergZerglingRush]	= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
 		results = std::vector<IntPair>(NumProtossStrategies);
-		usableStrategies.push_back(ProtossShield);
+        proberesults = std::vector<IntPair>(1);
 		
 		if(BWTA::getStartLocations().size() == 2) {
 			usableStrategies.push_back(ProtossProbeRush);
@@ -46,31 +46,34 @@ void StrategyManager::addStrategies()
 
 		if (enemyRace == BWAPI::Races::Protoss)
 		{
+            //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
-			usableStrategies.push_back(ProtossDragoons);
+			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Terran)
 		{
+            //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
-			usableStrategies.push_back(ProtossDragoons);
+			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Zerg)
 		{
+            //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
-			usableStrategies.push_back(ProtossDragoons);
+			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else
 		{
 			BWAPI::Broodwar->printf("Enemy Race Unknown");
-			usableStrategies.push_back(ProtossProbeRush);
+            //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
-			usableStrategies.push_back(ProtossDragoons);
+			//usableStrategies.push_back(ProtossDragoons);
 		}
 	}
 	else if (selfRace == BWAPI::Races::Terran)
@@ -94,6 +97,21 @@ void StrategyManager::readResults()
 {
 	struct stat buf;
 	std::string file = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+    std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+
+    // if the file doesn't exist, set the results to zeros
+	if (stat(file.c_str(), &buf) == -1) {
+		std::fill(proberesults.begin(), results.end(), IntPair(0,0));
+	}
+	else {
+		std::ifstream f_in(file.c_str());
+		std::string line;
+		getline(f_in, line);
+		proberesults[ProtossProbeRush].first = atoi(line.c_str());
+		getline(f_in, line);
+		proberesults[ProtossProbeRush].second = atoi(line.c_str());
+        f_in.close();
+    }
 
 	// if the file doesn't exist, set the results to zeros
 	if (stat(file.c_str(), &buf) == -1) {
@@ -119,22 +137,26 @@ void StrategyManager::readResults()
 		getline(f_in, line);
 		results[ProtossDarkTemplar].second = atoi(line.c_str());
 		getline(f_in, line);
-		results[ProtossDragoons].first = atoi(line.c_str());
-		getline(f_in, line);
-		results[ProtossDragoons].second = atoi(line.c_str());
-		getline(f_in, line);
-		results[ProtossShield].first = atoi(line.c_str());
-		getline(f_in, line);
-		results[ProtossShield].second = atoi(line.c_str());
-		f_in.close();
+        f_in.close();
 	}
 }
 
 void StrategyManager::writeResults()
 {
 	std::string file = Options::FileIO::WRITE_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
-	std::ofstream f_out(file.c_str());
+    std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
 
+
+
+    // if the file doesn't exist, set the results to zeros
+	if (currentStrategy=ProtossProbeRush) {
+        std::ofstream f_out(file.c_str());
+		f_out << results[ProtossProbeRush].first	<< "\n";
+	    f_out << results[ProtossProbeRush].second	<< "\n";
+        f_out.close();
+	}
+
+    std::ofstream f_out(file.c_str());
 	f_out << results[ProtossProbeRush].first	<< "\n";
 	f_out << results[ProtossProbeRush].second	<< "\n";
 	f_out << results[ProtossAirRush].first      << "\n";
@@ -143,10 +165,6 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossZealotRush].second  << "\n";
 	f_out << results[ProtossDarkTemplar].first  << "\n";
 	f_out << results[ProtossDarkTemplar].second << "\n";
-	f_out << results[ProtossDragoons].first     << "\n";
-	f_out << results[ProtossDragoons].second    << "\n";
-	f_out << results[ProtossShield].first		<< "\n";
-	f_out << results[ProtossShield].second		<< "\n";
 	f_out.close();
 }
 
@@ -155,6 +173,11 @@ void StrategyManager::setStrategy()
 	// if we are using file io to determine strategy, do so
 	if (Options::Modules::USING_STRATEGY_IO)
 	{
+        if(BWTA::getStartLocations().size() == 2) {
+            if (proberesults[ProtossProbeRush].second == 0)
+                currentStrategy = ProtossProbeRush;
+        }
+
 		double bestUCB = -1;
 		int bestStrategyIndex = 0;
 
@@ -438,10 +461,6 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 		else if (getCurrentStrategy() == ProtossDarkTemplar)
 		{
 			return getProtossDarkTemplarBuildOrderGoal();
-		}
-		else if (getCurrentStrategy() == ProtossDragoons)
-		{
-			return getProtossDragoonsBuildOrderGoal();
 		}
 
 		// if something goes wrong, use zealot goal

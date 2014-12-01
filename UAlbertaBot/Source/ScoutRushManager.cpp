@@ -128,7 +128,6 @@ void ScoutRushManager::allInAttack() {
 	BOOST_FOREACH (BWAPI::Unit * scout, workerScouts) {
         int attackers = getAttackingWorkers(scout);
         int nonFleeingScouts = getNonFleeingScouts(scout);
-        BWAPI::Broodwar->printf("scouts %d", numWorkerScouts);
 
         if (scout->isUnderAttack() && attackers > nonFleeingScouts) {
             scoutFleeing[scout->getID()] = true;
@@ -701,11 +700,11 @@ bool ScoutRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * sc
 
 	if (BWTA::getRegion(BWAPI::TilePosition(test2)) != enemyRegion &&
         BWTA::getRegion(BWAPI::TilePosition(test3)) != enemyRegion) {
-            BWAPI::Broodwar->printf("Too Narrow");
-
-            BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test2.x(), test2.y(), BWAPI::Colors::Red);
-            BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test3.x(), test3.y(), BWAPI::Colors::Red);
-                        BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), pos.x(), pos.y(), BWAPI::Colors::Green);
+            if (Options::Debug::DRAW_UALBERTABOT_DEBUG) {
+                BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test2.x(), test2.y(), BWAPI::Colors::Red);
+                BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), test3.x(), test3.y(), BWAPI::Colors::Red);
+                BWAPI::Broodwar->drawLineMap(scoutPos.x(), scoutPos.y(), pos.x(), pos.y(), BWAPI::Colors::Green);
+            }
         return false;
     }
 	// otherwise it's okay
