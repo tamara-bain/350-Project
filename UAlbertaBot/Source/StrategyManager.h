@@ -34,6 +34,7 @@ class StrategyManager
 	BWAPI::Race					enemyRace;
 
 	bool						firstAttackSent;
+	bool						doneInitialAirRush;
 
 	void	addStrategies();
 	void	setStrategy();

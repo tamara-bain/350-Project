@@ -39,8 +39,9 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	
 	} 
 
+	// if the order is to base assault, we only care about units in the enemy base
 	if(order.type == order.BaseAssault) {
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 1500, false, true);
+		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 	}
 
 	// otherwise we want to see everything on the way

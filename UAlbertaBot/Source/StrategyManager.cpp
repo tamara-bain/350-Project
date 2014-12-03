@@ -5,6 +5,7 @@
 // constructor
 StrategyManager::StrategyManager() 
 	: firstAttackSent(false)
+	, doneInitialAirRush(false)
 	, currentStrategy(0)
 	, selfRace(BWAPI::Broodwar->self()->getRace())
 	, enemyRace(BWAPI::Broodwar->enemy()->getRace())
@@ -378,15 +379,15 @@ const bool StrategyManager::expandProtossAirRush() const
 	int frame =					BWAPI::Broodwar->getFrameCount();
 
 	// if there are more than 10 idle workers, expand
-	//if (WorkerManager::Instance().getNumIdleWorkers() > 10)
-	//{
-	//	return true;
-	//}
+	if (WorkerManager::Instance().getNumIdleWorkers() > 10 && doneInitialAirRush)
+	{
+		return true;
+	}
 
 	// 2nd Nexus Conditions:
 	//		We have 10 or more scouts
 	//		It is past frame 12000
-	if ((numNexus < 2) && (numScouts > 10))
+	if ((numNexus < 2) && (numScouts > 10 || doneInitialAirRush ) && frame > 9000)
 	{
 		return true;
 	}
@@ -394,17 +395,17 @@ const bool StrategyManager::expandProtossAirRush() const
 	// 3nd Nexus Conditions:
 	//		We have 20 or more scouts
 	//		It is past frame 18000
-	if ((numNexus < 3) && (numScouts > 12 && frame > 21000))
+	if ((numNexus < 3) && (numScouts > 12 || doneInitialAirRush ) && frame > 15000)
 	{
 		return true;
 	}
 
-	if ((numNexus < 4) && (numScouts > 20 || frame > 25000))
+	if ((numNexus < 4) && (numScouts > 20 || frame > 21000))
 	{
 		return true;
 	}
 
-	if ((numNexus < 5) && (numScouts > 20 || frame > 32000))
+	if ((numNexus < 5) && (numScouts > 20 || frame > 26000))
 	{
 		return true;
 	}
