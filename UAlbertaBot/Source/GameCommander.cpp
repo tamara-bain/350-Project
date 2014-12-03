@@ -2,7 +2,7 @@
 #include "GameCommander.h"
 
 
-GameCommander::GameCommander() : numWorkerScouts(0)
+GameCommander::GameCommander() : numWorkerScouts(0), numWorkerRushers(0)
 {
 
 }
@@ -39,22 +39,28 @@ void GameCommander::update()
 	//	std::set<BWAPI::Unit*> emptyUnits;
 	//	combatCommander.update(emptyUnits);
 	//}
+
 	if (Options::Modules::USING_COMBATCOMMANDER)
 	{
 		combatCommander.update(combatUnits);
 	}
 	timerManager.stopTimer(TimerManager::Combat);
 
-	timerManager.startTimer(TimerManager::Scout);
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().ProtossProbeRush)
+    if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushProtoss ||
+        StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushTerran ||
+        StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushZerg)
 	{
-		scoutRushManager.update(scoutUnits);
+        timerManager.startTimer(TimerManager::WorkerRush);
+		workerRushManager.update(workerRushUnits);
+        timerManager.stopTimer(TimerManager::WorkerRush);
 	}
 	else if (Options::Modules::USING_SCOUTMANAGER)
 	{
+        timerManager.startTimer(TimerManager::Scout);
 		scoutManager.update(scoutUnits);
+        timerManager.stopTimer(TimerManager::Scout);
 	}
-	timerManager.stopTimer(TimerManager::Scout);
+
 
 	// utility managers
 	timerManager.startTimer(TimerManager::InformationManager);
@@ -105,7 +111,17 @@ void GameCommander::populateUnitVectors()
 	setValidUnits();
 
 	// set each type of unit
-	setScoutUnits();
+
+    // if you're using worker rush than ignore scouting
+    if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushProtoss ||
+        StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushTerran ||
+        StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().WorkerRushZerg) {
+		setWorkerRushUnits();
+	}
+    else {
+	    setScoutUnits();
+    }
+
 	if(StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAirRush) 
 	{
 		setAirHarassmentUnits();
@@ -141,11 +157,6 @@ void GameCommander::setValidUnits()
 // TODO: take this worker away from worker manager in a clever way
 void GameCommander::setScoutUnits()
 {
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::Instance().ProtossProbeRush) {
-		setScoutRushUnits();
-		return;
-	}
-
 	if (numWorkerScouts < 1)
 	{
 		// get the first supply provider we come across in our units, this should be the first one we make
@@ -169,19 +180,18 @@ void GameCommander::setScoutUnits()
 	}
 }
 
-void GameCommander::setScoutRushUnits() {
+void GameCommander::setWorkerRushUnits() {
 	// check with the strategy manager to decide our scout numbers
 	// if we're using probe rush we want to send out probes right away
 
-	if (numWorkerScouts < Options::Macro::SCOUT_RUSH_COUNT) {
-		// if we find a worker (which we should) add it to the scout vector
-		BWAPI::Unit * workerScout = getMineralWorker();
-		if (workerScout)
-		{
-			++numWorkerScouts;
-			scoutUnits.insert(workerScout);
-			assignedUnits.insert(workerScout);
-			WorkerManager::Instance().setScoutWorker(workerScout);
+	if (numWorkerRushers < Options::Macro::WORKER_RUSH_COUNT) {
+		// if we find a worker add it to the rush vector
+		BWAPI::Unit * recruit = getMineralWorker();
+		if (recruit) {
+			++numWorkerRushers;
+			workerRushUnits.insert(recruit);
+			assignedUnits.insert(recruit);
+			WorkerManager::Instance().setRushWorker(recruit);
 		}
 	}
 }
@@ -211,7 +221,8 @@ void GameCommander::setCombatUnits()
 			if (!isAssigned(unit) && unit->getType().isWorker())			
 			{	
 				// only assign it to combat if it's not building something
-				if (!WorkerManager::Instance().isBuilder(unit) && !WorkerManager::Instance().isWorkerScout(unit))
+				if (!WorkerManager::Instance().isBuilder(unit) && !WorkerManager::Instance().isWorkerScout(unit) 
+                    &&!WorkerManager::Instance().isRusher(unit))
 				{
 					combatUnits.insert(unit);
 					assignedUnits.insert(unit);

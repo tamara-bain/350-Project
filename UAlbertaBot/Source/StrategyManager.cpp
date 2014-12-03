@@ -26,23 +26,26 @@ void StrategyManager::addStrategies()
 	terranOpeningBook  = std::vector<std::string>(NumTerranStrategies);
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 	
-	protossOpeningBook[ProtossProbeRush]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
+	protossOpeningBook[WorkerRushProtoss]	= "0 0 0 0 0 0 0 1 0 3 0 0 0 4";
 	protossOpeningBook[ProtossAirRush]		= "0 0 0 0 1 0 9 0 0 10 0 10 0 10 0 7 0 1 0 3 0 10 0 5 0 10 0 17 1 17 3 18 18 4 4 4 30 1 10 18 18 1 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 1 0 3 0 4 0 4 0 4 1 4 0 3 4 0 4 4 1 0 4 4 0 3 4 4 4 1 0 4 4 4";
 	protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
-	//protossOpeningBook[ProtossDragoons]	= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
 	//protossOpeningBook[ProtossShield]	= "0 0 0 1 0 3 0 4 0 4 3 0 4 4 0 1 4 4 0 4 4 9 4 4 0 4 4 0 4 4 0";
-	terranOpeningBook[TerranMarineRush]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
+	terranOpeningBook[WorkerRushTerran]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
+    terranOpeningBook[TerranMarineRush]	= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
+    zergOpeningBook[WorkerRushZerg]	= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
 	zergOpeningBook[ZergZerglingRush]	= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
+
+    workerRushResults = std::vector<IntPair>(1);
 
 	if (selfRace == BWAPI::Races::Protoss)
 	{
 		results = std::vector<IntPair>(NumProtossStrategies);
-        proberesults = std::vector<IntPair>(1);
-		
-		if(BWTA::getStartLocations().size() == 2) {
-			usableStrategies.push_back(ProtossProbeRush);
-		}
+
+        if(BWTA::getStartLocations().size() == 2) {
+		    usableStrategies.push_back(WorkerRushProtoss);
+	    }
+
 
 		if (enemyRace == BWAPI::Races::Protoss)
 		{
@@ -50,7 +53,6 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
-			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Terran)
 		{
@@ -58,31 +60,33 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
 			usableStrategies.push_back(ProtossDarkTemplar);
-			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else if (enemyRace == BWAPI::Races::Zerg)
 		{
             //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
-			//usableStrategies.push_back(ProtossDragoons);
 		}
 		else
 		{
-			BWAPI::Broodwar->printf("Enemy Race Unknown");
             //usableStrategies.push_back(ProtossShield);
 			usableStrategies.push_back(ProtossAirRush);
 			usableStrategies.push_back(ProtossZealotRush);
-			//usableStrategies.push_back(ProtossDragoons);
 		}
 	}
 	else if (selfRace == BWAPI::Races::Terran)
 	{
+        if(BWTA::getStartLocations().size() == 2) {
+		    usableStrategies.push_back(WorkerRushTerran);
+	    }
 		results = std::vector<IntPair>(NumTerranStrategies);
 		usableStrategies.push_back(TerranMarineRush);
 	}
 	else if (selfRace == BWAPI::Races::Zerg)
 	{
+        if(BWTA::getStartLocations().size() == 2) {
+		    usableStrategies.push_back(WorkerRushZerg);
+	    }
 		results = std::vector<IntPair>(NumZergStrategies);
 		usableStrategies.push_back(ZergZerglingRush);
 	}
@@ -94,23 +98,12 @@ void StrategyManager::addStrategies()
 }
 
 void StrategyManager::readResults()
-{
+{	
+    if (!Options::Modules::USING_STRATEGY_IO)
+        return;
+
 	struct stat buf;
 	std::string file = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
-    std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
-
-    // if the file doesn't exist, set the results to zeros
-	if (stat(scoutfile.c_str(), &buf) == -1) {
-		std::fill(proberesults.begin(), proberesults.end(), IntPair(0,0));
-	}
-	else {
-		std::ifstream f_in(file.c_str());
-		std::string line;
-		getline(f_in, line);
-		proberesults[ProtossProbeRush].first = atoi(line.c_str());
-		getline(f_in, line);
-		proberesults[ProtossProbeRush].second = atoi(line.c_str());
-    }
 
 	// if the file doesn't exist, set the results to zeros
 	if (stat(file.c_str(), &buf) == -1) {
@@ -120,9 +113,9 @@ void StrategyManager::readResults()
 		std::ifstream f_in(file.c_str());
 		std::string line;
 		getline(f_in, line);
-		results[ProtossProbeRush].first = atoi(line.c_str());
+		results[WorkerRushProtoss].first = atoi(line.c_str());
 		getline(f_in, line);
-		results[ProtossProbeRush].second = atoi(line.c_str());
+		results[WorkerRushProtoss].second = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossAirRush].first = atoi(line.c_str());
 		getline(f_in, line);
@@ -138,26 +131,48 @@ void StrategyManager::readResults()
 		getline(f_in, line);
         f_in.close();
 	}
+
+    // store worker rush data in a map dependant file
+    // our goal is to always choose worker rush while it hasn't failed on a map vs an opponent
+    // then we'll fall back to UCB
+    std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+
+	if (stat(scoutfile.c_str(), &buf) == -1) {
+		std::fill(workerRushResults.begin(), workerRushResults.end(), IntPair(0,0));
+	}
+	else {
+		std::ifstream f_in(file.c_str());
+		std::string line;
+		getline(f_in, line);
+		workerRushResults[0].first = atoi(line.c_str());
+		getline(f_in, line);
+		workerRushResults[0].second = atoi(line.c_str());
+    }
 }
 
 void StrategyManager::writeResults()
 {
-	std::string file = Options::FileIO::WRITE_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
-    std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+    if (!Options::Modules::USING_STRATEGY_IO)
+        return;
 
+    // save the results of our worker rush separately
+	if (currentStrategy=WorkerRushProtoss) {
 
+        std::string scoutfile = Options::FileIO::READ_DIR + "HCB-" + BWAPI::Broodwar->mapName() + "-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
 
-    // if the file doesn't exist, set the results to zeros
-	if (currentStrategy=ProtossProbeRush) {
-        std::ofstream f_out(file.c_str());
-		f_out << results[ProtossProbeRush].first	<< "\n";
-	    f_out << results[ProtossProbeRush].second	<< "\n";
+        std::ofstream f_out(scoutfile.c_str());
+		f_out << results[WorkerRushProtoss].first	<< "\n";
+	    f_out << results[WorkerRushProtoss].second	<< "\n";
         f_out.close();
+
 	}
 
+    // write the results of our other strategies
+    std::string file = Options::FileIO::WRITE_DIR + "HCB-" + BWAPI::Broodwar->enemy()->getName() + ".txt";
+
     std::ofstream f_out(file.c_str());
-	f_out << results[ProtossProbeRush].first	<< "\n";
-	f_out << results[ProtossProbeRush].second	<< "\n";
+	f_out << results[WorkerRushProtoss].first	<< "\n";
+	f_out << results[WorkerRushProtoss].second	<< "\n";
 	f_out << results[ProtossAirRush].first      << "\n";
 	f_out << results[ProtossAirRush].second     << "\n";
 	f_out << results[ProtossZealotRush].first   << "\n";
@@ -172,9 +187,14 @@ void StrategyManager::setStrategy()
 	// if we are using file io to determine strategy, do so
 	if (Options::Modules::USING_STRATEGY_IO)
 	{
+        // if we're on a two player map and we haven't lost yet
+        // on this map to this opponent using worker rush, then continue
+        // using worker rush
         if(BWTA::getStartLocations().size() == 2) {
-            if (proberesults[ProtossProbeRush].second == 0)
-                currentStrategy = ProtossProbeRush;
+            if (workerRushResults[0].second == 0) {
+                currentStrategy = WorkerRushProtoss;
+                return;
+            }
         }
 
 		double bestUCB = -1;
@@ -222,10 +242,12 @@ void StrategyManager::onEnd(const bool isWinner)
 		{
 			if (isWinner)
 			{
+                workerRushResults[0].first = workerRushResults[0].first + 1;
 				results[getCurrentStrategy()].first = results[getCurrentStrategy()].first + 1;
 			}
 			else
 			{
+                workerRushResults[0].second = workerRushResults[0].second + 1;
 				results[getCurrentStrategy()].second = results[getCurrentStrategy()].second + 1;
 			}
 		}
@@ -234,10 +256,12 @@ void StrategyManager::onEnd(const bool isWinner)
 		{
 			if (getScore(BWAPI::Broodwar->self()) > getScore(BWAPI::Broodwar->enemy()))
 			{
+                workerRushResults[0].first = workerRushResults[0].first + 1;
 				results[getCurrentStrategy()].first = results[getCurrentStrategy()].first + 1;
 			}
 			else
 			{
+                workerRushResults[0].second = workerRushResults[0].second + 1;
 				results[getCurrentStrategy()].second = results[getCurrentStrategy()].second + 1;
 			}
 		}

@@ -55,7 +55,7 @@ namespace Options
 				Modules::USING_SCOUTMANAGER			= true;	
 				Modules::USING_COMBATCOMMANDER		= true;
 		        Modules::USING_MACRO_SEARCH			= true;	
-		        Modules::USING_STRATEGY_IO			= true;
+		        Modules::USING_STRATEGY_IO			= false;
                 Modules::USING_UNIT_COMMAND_MGR		= true; 
 		
                 Modules::USING_REPLAY_VISUALIZER	= false;
@@ -136,7 +136,7 @@ namespace Options
 
 	namespace Debug								// debugging options
 	{
-        bool DRAW_SCOUTRUSH_DEBUG				= true;		// draws debug information for UAlbertaBot
+        bool DRAW_WORKER_RUSH_DEBUG				= true;		// draws debug information for UAlbertaBot
 		bool DRAW_UALBERTABOT_DEBUG				= false;		// draws debug information for UAlbertaBot
 		bool DRAW_DEBUG_INTERFACE				= false;		// draws debug information for EnhancedUI
 
@@ -166,8 +166,8 @@ namespace Options
 	namespace Macro								// options for macro strategies
 	{
 
-		extern int SCOUT_RUSH_COUNT				= 4;									// number of scouts when using the rush strategy
+		extern int WORKER_RUSH_COUNT				= 4;									// number of scouts when using the rush strategy
         //extern int DEFAULT_STRATEGY				= StrategyManager::ProtossAirRush;		// default strategy to use when not using fileio
-        extern int DEFAULT_STRATEGY				= StrategyManager::ProtossProbeRush;		// default strategy to use when not using fileio
+        extern int DEFAULT_STRATEGY				= StrategyManager::WorkerRushProtoss;		// default strategy to use when not using fileio
 	}
 }

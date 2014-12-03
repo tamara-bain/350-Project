@@ -165,10 +165,10 @@
     <ClCompile Include="..\Source\Visualizer.cpp">
       <Filter>extra</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\ScoutRushManager.cpp" />
     <ClCompile Include="..\Source\micromanagement\AirManager.cpp" />
     <ClCompile Include="..\Source\BatteryStratManager.cpp" />
     <ClCompile Include="..\Source\AirHarassmentCommander.cpp" />
+    <ClCompile Include="..\Source\WorkerRushManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\CombatCommander.h">
@@ -300,9 +300,9 @@
     <ClInclude Include="..\Source\Visualizer.h">
       <Filter>extra</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\ScoutRushManager.h" />
     <ClInclude Include="..\Source\micromanagement\AirManager.h" />
     <ClInclude Include="..\Source\BatteryStratManager.h" />
     <ClInclude Include="..\Source\AirHarassmentCommander.h" />
+    <ClInclude Include="..\Source\WorkerRushManager.h" />
   </ItemGroup>
 </Project>

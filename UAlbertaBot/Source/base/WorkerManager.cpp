@@ -44,7 +44,9 @@ void WorkerManager::updateWorkerStatus()
 		if (worker->isIdle() && 
 			(workerData.getWorkerJob(worker) != WorkerData::Build) && 
 			(workerData.getWorkerJob(worker) != WorkerData::Move) &&
-			(workerData.getWorkerJob(worker) != WorkerData::Scout)) 
+			(workerData.getWorkerJob(worker) != WorkerData::Scout) &&
+            (workerData.getWorkerJob(worker) != WorkerData::Rusher)
+            ) 
 		{
 			//printf("Worker %d set to idle", worker->getID());
 			// set its job to idle
@@ -159,6 +161,15 @@ void WorkerManager::finishedWithScoutWorker(BWAPI::Unit * unit)
 		return; 
 
 	if (workerData.getWorkerJob(unit) == WorkerData::Scout) 
+		setMineralWorker(unit);
+}
+
+void WorkerManager::finishedWithRushWorker(BWAPI::Unit * unit) 
+{
+	if (unit == NULL) 
+		return; 
+
+	if (workerData.getWorkerJob(unit) == WorkerData::Rusher) 
 		setMineralWorker(unit);
 }
 
@@ -363,6 +374,15 @@ void WorkerManager::setScoutWorker(BWAPI::Unit * worker)
 	}
 
 	workerData.setWorkerJob(worker, WorkerData::Scout, NULL);
+}
+
+// sets a worker as part of our elite worker rush force!
+void WorkerManager::setRushWorker(BWAPI::Unit * worker)
+{
+	if (worker == NULL) 
+		assert(false);
+
+	workerData.setWorkerJob(worker, WorkerData::Rusher, NULL);
 }
 
 // gets a worker which will move to a current location
@@ -625,6 +645,12 @@ bool WorkerManager::isWorkerScout(BWAPI::Unit * worker)
 {
 	return (workerData.getWorkerJob(worker) == WorkerData::Scout);
 }
+
+bool WorkerManager::isRusher(BWAPI::Unit * worker)
+{
+	return (workerData.getWorkerJob(worker) == WorkerData::Rusher);
+}
+
 
 bool WorkerManager::isBuilder(BWAPI::Unit * worker)
 {

@@ -25,7 +25,7 @@ class WorkerData
 
 public:
 
-	enum WorkerJob {Minerals, Gas, Build, Combat, Idle, Repair, Move, Scout, Default};
+	enum WorkerJob {Minerals, Gas, Build, Combat, Idle, Repair, Move, Scout, Rusher, Default};
 
 private:
 

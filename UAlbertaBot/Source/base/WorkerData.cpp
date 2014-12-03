@@ -130,10 +130,6 @@ void WorkerData::setWorkerJob(BWAPI::Unit * unit, enum WorkerJob job, BWAPI::Uni
 		// start repairing 
 		unit->repair(jobUnit);
 	}
-	else if (job == Scout)
-	{
-
-	}
 }
 
 void WorkerData::setWorkerJob(BWAPI::Unit * unit, enum WorkerJob job, BWAPI::UnitType jobUnitType)
@@ -526,6 +522,7 @@ char WorkerData::getJobCode(BWAPI::Unit * unit)
 
 	if (j == WorkerData::Build) return 'B';
 	if (j == WorkerData::Combat) return 'C';
+    if (j == WorkerData::Rusher) return 'U';
 	if (j == WorkerData::Default) return 'D';
 	if (j == WorkerData::Gas) return 'G';
 	if (j == WorkerData::Idle) return 'I';

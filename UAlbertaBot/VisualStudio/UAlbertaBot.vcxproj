@@ -45,7 +45,7 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files (x86)\StarCraft\bwapi-data\AI</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">A:\Program Files\StarCraft1\bwapi-data\AI</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -147,7 +147,7 @@
     <ClCompile Include="..\Source\Options.cpp" />
     <ClCompile Include="..\Source\ReplayVisualizer.cpp" />
     <ClCompile Include="..\Source\ScoutManager.cpp" />
-    <ClCompile Include="..\Source\ScoutRushManager.cpp" />
+    <ClCompile Include="..\Source\WorkerRushManager.cpp" />
     <ClCompile Include="..\Source\Squad.cpp" />
     <ClCompile Include="..\Source\SquadData.cpp" />
     <ClCompile Include="..\Source\StrategyManager.cpp" />
@@ -195,7 +195,7 @@
     <ClInclude Include="..\Source\Options.h" />
     <ClInclude Include="..\Source\ReplayVisualizer.h" />
     <ClInclude Include="..\Source\ScoutManager.h" />
-    <ClInclude Include="..\Source\ScoutRushManager.h" />
+    <ClInclude Include="..\Source\WorkerRushManager.h" />
     <ClInclude Include="..\Source\Squad.h" />
     <ClInclude Include="..\Source\SquadData.h" />
     <ClInclude Include="..\Source\SquadOrder.h" />

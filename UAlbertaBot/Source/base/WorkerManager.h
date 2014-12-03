@@ -34,6 +34,7 @@ public:
 	void						handleCombatWorkers();
 	void						finishedWithCombatWorkers();
 	void						finishedWithScoutWorker(BWAPI::Unit * unit); 
+    void                        finishedWithRushWorker(BWAPI::Unit * unit); 
 
 	void						drawResourceDebugInfo();
 	void						updateWorkerStatus();
@@ -47,6 +48,7 @@ public:
 	bool						isWorkerScout(BWAPI::Unit * worker);
 	bool						isFree(BWAPI::Unit * worker);
 	bool						isBuilder(BWAPI::Unit * worker);
+    bool                        isRusher(BWAPI::Unit * worker);
 
 	BWAPI::Unit *				getBuilder(Building & b, bool setJobAsBuilder = true);
 	BWAPI::Unit *				getMoveWorker(BWAPI::Position p);
@@ -57,6 +59,7 @@ public:
 
 	void						setMoveWorker(int m, int g, BWAPI::Position p);
 	void						setCombatWorker(BWAPI::Unit * worker);
+    void                        setRushWorker(BWAPI::Unit * worker);
 	void						smartAttackUnit(BWAPI::Unit * attacker, BWAPI::Unit * target);
 
 	bool						willHaveResources(int mineralsRequired, int gasRequired, double distance);

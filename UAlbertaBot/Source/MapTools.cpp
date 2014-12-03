@@ -112,23 +112,6 @@ void MapTools::drawMapData() {
         BWAPI::TilePosition tile = base->getTilePosition();
         BWAPI::Broodwar->drawBox(BWAPI::CoordinateType::Map, tile.x()*32, tile.y()*32, tile.x()*32+4*32, tile.y()*32+3*32, BWAPI::Colors::Blue, false);
   }
-
-  // draw outlines of regions in green
-  BOOST_FOREACH(BWTA::Region * region, BWTA::getRegions()) {
-        BWTA::Polygon poly = region->getPolygon();
-    
-    for (int j = 0; j < (int)poly.size(); j++) {
-        BWAPI::Position point1 = poly[j];
-        BWAPI::Position point2 = poly[(j+1) % poly.size()];      
-        BWAPI::Broodwar->drawLine(BWAPI::CoordinateType::Map, point1.x(), point1.y(), point2.x(), point2.y(), BWAPI::Colors::Green);
-    }
-
-    BOOST_FOREACH (BWTA::Chokepoint * chokepoint, region->getChokepoints()) {
-    BWAPI::Position point1 = chokepoint->getSides().first;
-    BWAPI::Position point2 = chokepoint->getSides().second;
-    BWAPI::Broodwar->drawLine(BWAPI::CoordinateType::Map, point1.x(), point1.y(), point2.x(), point2.y(), BWAPI::Colors::Red);
-    }
-  }
 }
 
 void MapTools::drawMyRegion()

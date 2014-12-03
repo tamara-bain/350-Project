@@ -9,7 +9,7 @@
 #include "base/BuildingManager.h"
 #include "ScoutManager.h"
 #include "StrategyManager.h"
-#include "ScoutRushManager.h"
+#include "WorkerRushManager.h"
 #include "BatteryStratManager.h"
 #include "AirHarassmentCommander.h"
 
@@ -25,7 +25,7 @@ class TimerManager
 
 public:
 
-	enum Type { All, Worker, Production, Building, Combat, Scout, InformationManager, MapGrid, MapTools, Search, NumTypes };
+	enum Type { All, Worker, Production, Building, Combat, Scout, WorkerRush, InformationManager, MapGrid, MapTools, Search, NumTypes };
 
 
 	TimerManager() : timers(std::vector<BuildOrderSearch::Timer>(NumTypes)), barWidth(40)
@@ -36,6 +36,7 @@ public:
 		timerNames.push_back("Building");
 		timerNames.push_back("Combat");
 		timerNames.push_back("Scout");
+        timerNames.push_back("WorkerRush");
 		timerNames.push_back("UnitInfo");
 		timerNames.push_back("MapGrid");
 		timerNames.push_back("MapTools");
@@ -98,19 +99,21 @@ class GameCommander
 	CombatCommander			combatCommander;
 	AirHarassmentCommander  airHarassmentCommander;
 	ScoutManager			scoutManager;
-	ScoutRushManager		scoutRushManager;
+	WorkerRushManager		workerRushManager;
 	BatteryStratManager		batteryStratManager;
 	TimerManager			timerManager;
 
 	std::set<BWAPI::Unit *> combatUnits;
 	std::set<BWAPI::Unit *> airHarassmentUnits;
 	std::set<BWAPI::Unit *> scoutUnits;
+    std::set<BWAPI::Unit *> workerRushUnits;
 	std::set<BWAPI::Unit *> workerUnits;
 
 	std::set<BWAPI::Unit *>	validUnits;
 	std::set<BWAPI::Unit *> assignedUnits;
 
 	int numWorkerScouts;
+    int numWorkerRushers;
 
 	const bool isAssigned(BWAPI::Unit * unit) const;
 
@@ -124,7 +127,7 @@ public:
 	void populateUnitVectors();
 	void setValidUnits();
 	void setScoutUnits();
-	void setScoutRushUnits();
+	void setWorkerRushUnits();
 	void setWorkerUnits();
 	void setAirHarassmentUnits();
 	void setCombatUnits();

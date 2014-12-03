@@ -25,7 +25,8 @@ class StrategyManager
 	std::vector<std::string>	zergOpeningBook;
 
 	std::vector<IntPair>		results;
-    std::vector<IntPair>		proberesults;
+    std::vector<IntPair>		workerRushResults;
+
 	std::vector<int>			usableStrategies;
 	int							currentStrategy;
 
@@ -68,13 +69,13 @@ class StrategyManager
 
 public:
 
-	enum { ProtossProbeRush=0, ProtossAirRush=1, ProtossZealotRush=2, ProtossDarkTemplar=3, NumProtossStrategies=4 };
-	enum { TerranMarineRush=0, NumTerranStrategies=1 };
-	enum { ZergZerglingRush=0, NumZergStrategies=1 };
+	enum { WorkerRushProtoss=0, ProtossAirRush=1, ProtossZealotRush=2, ProtossDarkTemplar=3, NumProtossStrategies=4 };
+	enum { WorkerRushTerran=0, TerranMarineRush=1, NumTerranStrategies=2 };
+	enum { WorkerRushZerg=0, ZergZerglingRush=1, NumZergStrategies=2 };
 
 	static	StrategyManager &	Instance();
 
-			void				onEnd(const bool isWinner);
+	void				onEnd(const bool isWinner);
 	
 	const	bool				regroup(int numInRadius);
 	const	bool				doAttack(const std::set<BWAPI::Unit *> & freeUnits);

@@ -52,7 +52,7 @@ namespace Options
 
 	namespace Debug
 	{
-        extern bool DRAW_SCOUTRUSH_DEBUG;				// draws debug information for UAlbertaBot
+        extern bool DRAW_WORKER_RUSH_DEBUG;				// draws debug information for UAlbertaBot
 		extern bool DRAW_UALBERTABOT_DEBUG;				// draws debug information for UAlbertaBot
 		extern bool DRAW_DEBUG_INTERFACE;				// draws debug information for EnhancedUI
 
@@ -81,7 +81,7 @@ namespace Options
 
 	namespace Macro
 	{
-		extern int SCOUT_RUSH_COUNT;
+		extern int WORKER_RUSH_COUNT;
 		extern int DEFAULT_STRATEGY;
 	}
 }
