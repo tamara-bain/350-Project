@@ -12,7 +12,7 @@ AirHarassmentCommander::AirHarassmentCommander()
 
 bool AirHarassmentCommander::squadUpdateFrame()
 {
-	return BWAPI::Broodwar->getFrameCount() % 11 == 0;
+	return BWAPI::Broodwar->getFrameCount() % 24 == 0;
 }
 
 void AirHarassmentCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
