@@ -6,6 +6,8 @@
 WorkerRushManager::WorkerRushManager() : enemyRegion(NULL), enemyBase(NULL), 
     enemyGeyser(NULL), ourBase(NULL), leader(NULL) { }
 
+// Called by the Game Commander to update activities for each of the
+// workers in it's list of rushing workers
 void WorkerRushManager::update(const std::set<BWAPI::Unit *> & workerUnits) {
 	
     // save the location of our base if we haven't yet
@@ -152,6 +154,8 @@ void WorkerRushManager::moveFollowers() {
 	}
 }
 
+// logic to prevent people from blocking us out of their base
+// with probes. We'll attack if we get in range of a non moving target
 bool WorkerRushManager::attackIfEncounterBlockade() {
     BWAPI::Unit * target = NULL;
 
@@ -182,6 +186,10 @@ bool WorkerRushManager::attackIfEncounterBlockade() {
     return false;
 }
 
+// worker states are stored in maps
+// three key states track whether the worker is 'fleeing'
+// moving asside to let a fleeing worker through
+// or ready to attack
 void WorkerRushManager::updateStates() {
 
     // find out which workers are being attacked
@@ -237,7 +245,9 @@ void WorkerRushManager::updateStates() {
 	}
 }
 
-bool WorkerRushManager::tooDangerous(BWAPI::Unit * worker) {
+// our environment is too dangerous if we have more potential attackers
+// then combat ready allies in our radius
+bool WorkerRushManager::tooDangerous(const BWAPI::Unit * worker) {
     int id = worker -> getID();
 
     if (threatsInRadius[id] > combatReadyInRadius[id] + WorkerRushOptions::SAFETY_THRESH)
@@ -246,7 +256,9 @@ bool WorkerRushManager::tooDangerous(BWAPI::Unit * worker) {
     return false;
 }
 
-bool WorkerRushManager::readyForCombat(BWAPI::Unit * worker) {
+// all scouts not fleeing or moving for fleeing scouts are 
+// considered ready for combat
+bool WorkerRushManager::readyForCombat(const BWAPI::Unit * worker) {
     int id = worker -> getID();
 
     if (!workerFleeing[id] && !workerMovingFromFleeing[id])
@@ -255,6 +267,9 @@ bool WorkerRushManager::readyForCombat(BWAPI::Unit * worker) {
     return false;
 }
 
+// Use our state and environment maps to 
+// decide whether to flee, move for fleeing workers
+// or attack
 void WorkerRushManager::allInAttack() {
 
     leader = getLeader();
@@ -265,6 +280,9 @@ void WorkerRushManager::allInAttack() {
     // move workers that are blocking the way first
     BOOST_FOREACH (BWAPI::Unit * unit, workerRushers) {
         int id = unit -> getID();
+
+        // workers who should move out of the way for fleeing
+        // workers 
         if (workerMovingFromFleeing[id]) {
             flee(unit);
             continue;
@@ -313,7 +331,7 @@ void WorkerRushManager::flee(BWAPI::Unit * worker) {
     smartMove(worker, fleeTo);
 }
 
-int WorkerRushManager::getAttackingEnemyWorkers(BWAPI::Unit * worker) {
+int WorkerRushManager::getAttackingEnemyWorkers(const BWAPI::Unit * worker) {
     
     int attackingWorkers = 0;
     
@@ -332,7 +350,7 @@ int WorkerRushManager::getAttackingEnemyWorkers(BWAPI::Unit * worker) {
     return attackingWorkers;
 }
 
-int WorkerRushManager::getNonFleeingWorkers(BWAPI::Unit * worker) {
+int WorkerRushManager::getNonFleeingWorkers(const BWAPI::Unit * worker) {
     int nonFleeingWorkers = 0;
     
     BOOST_FOREACH(BWAPI::Unit * ally, workerRushers) {
@@ -349,8 +367,7 @@ int WorkerRushManager::getNonFleeingWorkers(BWAPI::Unit * worker) {
     return nonFleeingWorkers;
 }
 
-
-BWAPI::Unit * WorkerRushManager::getAttacker(BWAPI::Unit * worker) {
+BWAPI::Unit * WorkerRushManager::getAttacker(const BWAPI::Unit * worker) {
 
 	BWAPI::Position position = worker->getPosition();
 
@@ -371,7 +388,7 @@ BWAPI::Unit * WorkerRushManager::getAttacker(BWAPI::Unit * worker) {
 	return currentTarget;
 }
 
-BWAPI::Unit * WorkerRushManager::getLastTarget(BWAPI::Unit * worker) {
+BWAPI::Unit * WorkerRushManager::getLastTarget(const BWAPI::Unit * worker) {
 
 	BWAPI::Position position = worker->getPosition();
 	int range = worker->getType().groundWeapon().maxRange();
@@ -399,7 +416,7 @@ BWAPI::Unit * WorkerRushManager::getLastTarget(BWAPI::Unit * worker) {
 	return NULL;
 }
 
-BWAPI::Unit * WorkerRushManager::getWorkerRushTarget(BWAPI::Unit * worker)
+BWAPI::Unit * WorkerRushManager::getWorkerRushTarget(const BWAPI::Unit * worker)
 {
     BWAPI::Unit * closestEnemyWorker = NULL;
 
@@ -473,7 +490,7 @@ BWAPI::Unit * WorkerRushManager::getWorkerRushTarget(BWAPI::Unit * worker)
 	return closestEnemyOther;
 }
 
-BWAPI::Unit * WorkerRushManager::getMineralWorker(BWAPI::Unit * worker)
+BWAPI::Unit * WorkerRushManager::getMineralWorker(const BWAPI::Unit * worker)
 {
 	// if the last command was an attack try to get the last target
 	BWAPI::Unit * closestEnemyWorker = getLastTarget(worker);
@@ -508,7 +525,7 @@ BWAPI::Unit * WorkerRushManager::getMineralWorker(BWAPI::Unit * worker)
 	return closestEnemyWorker;
 }
 
-bool WorkerRushManager::isDoingWorkerStuff(BWAPI::Unit * unit) {
+bool WorkerRushManager::isDoingWorkerStuff(const BWAPI::Unit * unit) {
     if (unit->isGatheringMinerals() || unit->isGatheringGas() || unit->isConstructing())
         return true;
     return false;
@@ -532,11 +549,11 @@ BWAPI::Unit * WorkerRushManager::getEnemyGeyser()
 	return enemyGeyser;
 }
 
-bool WorkerRushManager::enemyInRadius(BWAPI::Unit * worker)
+bool WorkerRushManager::enemyInRadius(const BWAPI::Unit * worker)
 {
 	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits()) {
 
-		if (unit->getType().canAttack() && (unit->getDistance(worker) < 175)
+		if (unit->getType().canAttack() && (worker->getDistance(unit) < 175)
             && !isDoingWorkerStuff(unit)) {
 			return true;
 		}
@@ -545,13 +562,13 @@ bool WorkerRushManager::enemyInRadius(BWAPI::Unit * worker)
 	return false;
 }
 
-bool WorkerRushManager::fleeingWorkerInRadius(BWAPI::Unit * worker, BWAPI::Position pos)
+bool WorkerRushManager::fleeingWorkerInRadius(const BWAPI::Unit * worker, const BWAPI::Position pos)
 {
 	BWAPI::Unit * target = NULL;
 
 	BOOST_FOREACH(BWAPI::Unit * unit, workerRushers) {
 
-		if (unit != worker && unit->getDistance(worker) < WorkerRushOptions::MAKE_WAY_RADIUS && workerFleeing[unit->getID()]) {
+		if (unit != worker && worker->getDistance(unit) < WorkerRushOptions::MAKE_WAY_RADIUS && workerFleeing[unit->getID()]) {
 			return true;
 		}
 	}
@@ -559,12 +576,12 @@ bool WorkerRushManager::fleeingWorkerInRadius(BWAPI::Unit * worker, BWAPI::Posit
 	return false;
 }
 
-void WorkerRushManager::fillGroundThreats(std::vector<GroundThreat> & threats, BWAPI::Unit * worker)
+void WorkerRushManager::fillGroundThreats(std::vector<GroundThreat> & threats, const BWAPI::Unit * worker)
 {
 
     BOOST_FOREACH(BWAPI::Unit* ally, workerRushers) {
         if (workerFleeing[ally->getID()] && ally != worker 
-            && ally->getDistance(worker) > WorkerRushOptions::ALLY_AVOIDANCE_FACTOR) {
+            && worker->getDistance(ally) > WorkerRushOptions::ALLY_AVOIDANCE_FACTOR) {
 		    GroundThreat threat;
 		    threat.unit		= ally;
 		    threat.weight	= WorkerRushOptions::ALLY_AVOIDANCE_FACTOR;
@@ -624,8 +641,7 @@ void WorkerRushManager::smartAttack(BWAPI::Unit * attacker, BWAPI::Unit * target
 	attacker->attack(target);
 }
 
-
-BWAPI::Position WorkerRushManager::calcFleePosition(const std::vector<GroundThreat> & threats, BWAPI::Unit * worker) 
+BWAPI::Position WorkerRushManager::calcFleePosition(const std::vector<GroundThreat> & threats, const BWAPI::Unit * worker) 
 {
 	// calculate the standard flee vector
     BWAPI::Position pos = worker->getPosition();
@@ -688,7 +704,7 @@ BWAPI::Position WorkerRushManager::calcFleePosition(const std::vector<GroundThre
 	return fleeTo;
 }
 
-double2 WorkerRushManager::getFleeVector(const std::vector<GroundThreat> & threats, BWAPI::Position pos)
+double2 WorkerRushManager::getFleeVector(const std::vector<GroundThreat> & threats, const BWAPI::Position pos)
 {
 	double2 fleeVector(0,0);
 
@@ -716,7 +732,7 @@ double2 WorkerRushManager::getFleeVector(const std::vector<GroundThreat> & threa
 	return fleeVector;
 }
 
-bool WorkerRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * worker, double2 fleeVector) {
+bool WorkerRushManager::isValidFleePosition(const BWAPI::Position pos, const BWAPI::Unit * worker, const double2 fleeVector) {
 
     // if it's not walkable throw it out
 	if (!BWAPI::Broodwar->isWalkable(pos.x()/8, pos.y()/8)) 
@@ -759,14 +775,7 @@ bool WorkerRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * w
 		if (mineral->getDistance(pos) < WorkerRushOptions::AVOID_MINERAL)
 			return false;
     }
-    
-
-   
-    // If we're outside of our desired radius for our center region, then don't move any further away
-   // if (dist_center > WorkerRushOptions::REGION_KITE_RADIUS && dist_base > WorkerRushOptions::BASE_KITE_RADIUS) {
-    //    if (dist_center > worker->getPosition().getDistance(center))
-    //        return false;
-    //}
+  
 
     // check area around the worker, we don't want it going into spaces that are too tight
     double2 r1(fleeVector);
@@ -806,7 +815,7 @@ bool WorkerRushManager::isValidFleePosition(BWAPI::Position pos, BWAPI::Unit * w
     return false;
 }
 
-bool WorkerRushManager::testPosition(BWAPI::Position pos) {
+bool WorkerRushManager::testPosition(const BWAPI::Position pos) {
     
     if (!pos.isValid())
         return false;
