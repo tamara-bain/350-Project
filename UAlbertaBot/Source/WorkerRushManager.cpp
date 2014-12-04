@@ -218,7 +218,7 @@ void WorkerRushManager::updateStates() {
 
         // otherwise if we have allies near us that are trying to flee
         // set us as moving out of their way
-        if(fleeingInRadius[id]) 
+        if(fleeingInRadius[id] && tooDangerous(unit)) 
             workerMovingFromFleeing[id] = true;
         else 
             workerMovingFromFleeing[id] = false;
