@@ -32,20 +32,19 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	// Discover enemies within region of interest
 	UnitVector nearbyEnemies;
 
+	bool baseRush = order.type == order.BaseAssault && BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Scout) < 3;
+
 	// if the order is to defend, we only care about units in the radius of the defense
-	if (order.type == order.Defend)
+	// if the order is to base assault, we only care about units in the radius of the enemy base
+	if (order.type == order.Defend || (order.type == order.BaseAssault && baseRush))
 	{
 		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 	
 	} 
 
-	// if the order is to base assault, we only care about units in the enemy base
-	if(order.type == order.BaseAssault) {
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
-	}
 
 	// otherwise we want to see everything on the way
-	else if (order.type == order.Attack) 
+	else if (order.type == order.Attack || (order.type == order.BaseAssault && baseRush)) 
 	{
 		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 		BOOST_FOREACH (BWAPI::Unit * unit, units) 
@@ -55,50 +54,10 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 			MapGrid::Instance().GetUnits(nearbyEnemies, unit->getPosition(), 800, false, true);
 		}
 	}
+	
+	// Allow micromanager to handle enemies
+	executeMicro(nearbyEnemies);
 
-	// the following block of code attacks all units on the way to the order position
-	// we want to do this if the order is attack, defend, or harass
-	if (order.type == order.Attack || order.type == order.Defend) 
-	{
-        // if this is a worker defense force
-        if (units.size() == 1 && units[0]->getType().isWorker())
-        {
-            executeMicro(nearbyEnemies);
-        }
-        // otherwise it is a normal attack force
-        else
-        {
-             // remove enemy worker units unless they are in one of their occupied regions
-            UnitVector workersRemoved;
-
-            BOOST_FOREACH (BWAPI::Unit * enemyUnit, nearbyEnemies) 
-		    {
-                // if its not a worker add it to the targets
-			    if (!enemyUnit->getType().isWorker())
-                {
-                    workersRemoved.push_back(enemyUnit);
-                }
-                // if it is a worker
-                else
-                {
-                    BOOST_FOREACH(BWTA::Region * enemyRegion, InformationManager::Instance().getOccupiedRegions(BWAPI::Broodwar->enemy()))
-                    {
-                        // only add it if it's in their region
-                        //if (BWTA::getRegion(BWAPI::TilePosition(enemyUnit->getPosition())) == enemyRegion)
-                        //{
-                            workersRemoved.push_back(enemyUnit);
-                        //}
-                    }
-                }
-		    }
-
-		    // Allow micromanager to handle enemies
-		    executeMicro(workersRemoved);
-        }
-	}
-	else if(order.type == order.BaseAssault) { 
-		executeMicro(nearbyEnemies);
-	}
 }
 
 void MicroManager::regroup(const BWAPI::Position & regroupPosition) const
