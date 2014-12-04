@@ -33,8 +33,7 @@ void AirManager::executeMicro(const UnitVector & targets)
 				BWAPI::Unit * target = getTarget(airUnit, airUnitTargets);
 
 				// attack it
-				kiteTarget(airUnit, target);
-				//smartAttackUnit(airUnit, target);
+				smartAttackUnit(airUnit, target);
 			}
 			// if there are no targets
 			else
@@ -42,15 +41,8 @@ void AirManager::executeMicro(const UnitVector & targets)
 				// if we're not near the order position
 				if (airUnit->getDistance(order.position) > 100)
 				{
-					if(BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Scout) < 3)
-					{
-						// need to get to the base quick to maintain air superiority
-						smartMove(airUnit, order.position);
-					}
-					else 
-					{
-						smartAttackMove(airUnit, order.position);
-					}
+					// need to get to the base quick to maintain air superiority
+					smartMove(airUnit, order.position);
 				}
 			}
 		}
@@ -60,65 +52,6 @@ void AirManager::executeMicro(const UnitVector & targets)
 			BWAPI::Broodwar->drawLineMap(airUnit->getPosition().x(), airUnit->getPosition().y(), 
 				airUnit->getTargetPosition().x(), airUnit->getTargetPosition().y(), Options::Debug::COLOR_LINE_TARGET);
 		}
-	}
-}
-
-void AirManager::kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target)
-{
-	
-	double range(airUnit->getType().airWeapon().maxRange());
-
-	// determine whether the target can be kited
-	if (range <= target->getType().airWeapon().maxRange())
-	{
-		// if we can't kite it, there's no point
-		smartAttackUnit(airUnit, target);
-		return;
-	}
-
-	double		minDist(24);
-	bool		kite(true);
-	double		dist(airUnit->getDistance(target));
-	double		speed(airUnit->getType().topSpeed());
-
-	double	timeToEnter = std::max(0.0,(dist - range) / (speed/2)); // This is pretty broken, since scouts have acceleration. FIX ME!
-	
-	if(!target->getType().isFlyer())
-	{
-		// only kite flying units
-		kite = false;
-	}
-	
-	if ((timeToEnter >= airUnit->getAirWeaponCooldown()) && (dist >= minDist))
-	{
-		kite = false;
-	}
-
-	if (target->getType().isBuilding() && target->getType() != BWAPI::UnitTypes::Terran_Bunker)
-	{
-		kite = false;
-	}
-
-	if (airUnit->isSelected())
-	{
-		BWAPI::Broodwar->drawCircleMap(airUnit->getPosition().x(), airUnit->getPosition().y(), 
-			(int)range, BWAPI::Colors::Cyan);
-	}
-
-	// if we can't shoot, run away
-	if (kite)
-	{
-		BWAPI::Position fleePosition(airUnit->getPosition() - target->getPosition() + airUnit->getPosition());
-
-		BWAPI::Broodwar->drawLineMap(airUnit->getPosition().x(), airUnit->getPosition().y(), 
-			fleePosition.x(), fleePosition.y(), BWAPI::Colors::Cyan);
-
-		smartMove(airUnit, fleePosition);
-	}
-	// otherwise shoot
-	else
-	{
-		smartAttackUnit(airUnit, target);
 	}
 }
 
@@ -176,14 +109,22 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 
 	bool canAttackUs = targetType.airWeapon() != BWAPI::WeaponTypes::None;
 
+	//Target carriers before interceptors
+	if(targetType ==  BWAPI::UnitTypes::Protoss_Carrier)
+	{
+		return 12;
+	}
+	else if(targetType ==  BWAPI::UnitTypes::Protoss_Interceptor)
+	{
+		return 11;
+	}
 	// Take out repairing workers first!
-	if(target->isRepairing())
+	else if(target->isRepairing())
 	{
 		return 10;
 	}
-
 	// second highest priority is air defense structures
-	if(targetType ==  BWAPI::UnitTypes::Zerg_Spore_Colony     || 
+	else if(targetType ==  BWAPI::UnitTypes::Zerg_Spore_Colony     || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Missile_Turret || 
 	   targetType ==  BWAPI::UnitTypes::Protoss_Photon_Cannon || 
 	   targetType ==  BWAPI::UnitTypes::Terran_Bunker)

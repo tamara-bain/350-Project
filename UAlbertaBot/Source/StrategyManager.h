@@ -34,6 +34,7 @@ class StrategyManager
 	BWAPI::Race					enemyRace;
 
 	bool						firstAttackSent;
+	bool						doneInitialAirRush;
 
 	void	addStrategies();
 	void	setStrategy();
@@ -81,6 +82,7 @@ public:
 	const	bool				doAttack(const std::set<BWAPI::Unit *> & freeUnits);
 	const	int				    defendWithWorkers();
 	const	bool				rushDetected();
+	const   bool				doAirRush();
 
 	const	int					getCurrentStrategy();
 

@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "AirHarassmentCommander.h"
+#include "StrategyManager.h"
 
 AirHarassmentCommander::AirHarassmentCommander() 
 	: attacking(false)
@@ -55,6 +56,7 @@ void AirHarassmentCommander::assignHarassmentSquads(std::set<BWAPI::Unit *> & un
 void AirHarassmentCommander::assignBaseAssault(std::set<BWAPI::Unit *> & unitsToAssign) {
 	
 	if (unitsToAssign.empty()) { return; }
+	if (StrategyManager::Instance().doAirRush() == false) { return; }
 
 	BWTA::BaseLocation * enemyBase = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
 	BWTA::Region * enemyRegion = enemyBase->getRegion();
@@ -62,19 +64,10 @@ void AirHarassmentCommander::assignBaseAssault(std::set<BWAPI::Unit *> & unitsTo
 
 	if (enemyBase && enemyRegion->getCenter().isValid()) 
 	{
+		UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
+		unitsToAssign.clear();
 
-		UnitVector oppUnitsInArea, ourUnitsInArea;
-		MapGrid::Instance().GetUnits(oppUnitsInArea, enemyRegion->getCenter(), 800, false, true);
-		MapGrid::Instance().GetUnits(ourUnitsInArea, enemyRegion->getCenter(), 200, true, false);
-		
-		// Early game air rush
-		if (BWAPI::Broodwar->getFrameCount() < 15000 || !oppUnitsInArea.empty())
-		{
-			UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
-			unitsToAssign.clear();
-
-			squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::BaseAssault, enemyRegion->getCenter(), 1500, "Base Assault")));
-		}
+		squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::BaseAssault, enemyRegion->getCenter(), 1000, "Base Assault")));
 	}
 
 }

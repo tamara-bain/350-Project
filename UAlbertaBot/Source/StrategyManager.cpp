@@ -5,6 +5,7 @@
 // constructor
 StrategyManager::StrategyManager() 
 	: firstAttackSent(false)
+	, doneInitialAirRush(false)
 	, currentStrategy(0)
 	, selfRace(BWAPI::Broodwar->self()->getRace())
 	, enemyRace(BWAPI::Broodwar->enemy()->getRace())
@@ -374,19 +375,19 @@ const bool StrategyManager::expandProtossAirRush() const
 	}
 
 	int numNexus =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
-	int numScouts =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+	int numScouts =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Scout);
 	int frame =					BWAPI::Broodwar->getFrameCount();
 
 	// if there are more than 10 idle workers, expand
-	//if (WorkerManager::Instance().getNumIdleWorkers() > 10)
-	//{
-	//	return true;
-	//}
+	if (WorkerManager::Instance().getNumIdleWorkers() > 10 && doneInitialAirRush)
+	{
+		return true;
+	}
 
 	// 2nd Nexus Conditions:
 	//		We have 10 or more scouts
 	//		It is past frame 12000
-	if ((numNexus < 2) && (numScouts > 10))
+	if ((numNexus < 2) && (numScouts >= 10 || doneInitialAirRush ) && frame > 9000)
 	{
 		return true;
 	}
@@ -394,17 +395,17 @@ const bool StrategyManager::expandProtossAirRush() const
 	// 3nd Nexus Conditions:
 	//		We have 20 or more scouts
 	//		It is past frame 18000
-	if ((numNexus < 3) && (numScouts > 12 && frame > 21000))
+	if ((numNexus < 3) && (numScouts >= 12 || doneInitialAirRush ) && frame > 15000)
 	{
 		return true;
 	}
 
-	if ((numNexus < 4) && (numScouts > 20 || frame > 25000))
+	if ((numNexus < 4) && (numScouts > 20 || frame > 21000))
 	{
 		return true;
 	}
 
-	if ((numNexus < 5) && (numScouts > 20 || frame > 32000))
+	if ((numNexus < 5) && (numScouts > 20 || frame > 26000))
 	{
 		return true;
 	}
@@ -544,18 +545,14 @@ const MetaPairVector StrategyManager::getProtossAirRushBuildOrderGoal() const
 			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
 		}
 	}
-
-	if (numScouts >= 10 || BWAPI::Broodwar->getFrameCount() > 11000)
-	{
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
-		if(BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) == 0)
-			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1)); // hack so we don't get 2.. lol
-	}
 	
 	if (numNexusCompleted >= 2)
 	{
 		numZealotsWanted +=2;
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Air_Weapons, 1));
+		if(BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) == 0)
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1));
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
 	}
 
 	if (numNexusCompleted >= 3)
@@ -831,7 +828,19 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 	return (const std::vector< std::pair<MetaType, UnitCountType> >)goal;
 }
 
- const int StrategyManager::getCurrentStrategy()
- {
-	 return currentStrategy;
- }
+const int StrategyManager::getCurrentStrategy()
+{
+	return currentStrategy;
+}
+
+const bool StrategyManager::doAirRush()
+{
+	int numDeadScouts = BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+
+	if(numDeadScouts > 5)
+	{
+		doneInitialAirRush = true;
+	}
+	
+	return !doneInitialAirRush;
+}

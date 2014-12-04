@@ -56,7 +56,7 @@ protected:
 		}
 	}
 	
-	std::vector<Action> getBuildOrder(StarcraftState & state)
+	std::vector<Action> getBuildOrder(StarcraftState state)
 	{
 		std::vector<Action> buildOrder;
 		

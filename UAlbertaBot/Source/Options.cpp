@@ -137,7 +137,7 @@ namespace Options
 	namespace Debug								// debugging options
 	{
         bool DRAW_WORKER_RUSH_DEBUG				= true;		// draws debug information for UAlbertaBot
-		bool DRAW_UALBERTABOT_DEBUG				= false;		// draws debug information for UAlbertaBot
+		bool DRAW_UALBERTABOT_DEBUG				= true;		// draws debug information for UAlbertaBot
 		bool DRAW_DEBUG_INTERFACE				= false;		// draws debug information for EnhancedUI
 
 		BWAPI::Color COLOR_LINE_TARGET			= BWAPI::Colors::White;
@@ -165,7 +165,6 @@ namespace Options
 
 	namespace Macro								// options for macro strategies
 	{
-
 		extern int WORKER_RUSH_COUNT				= 4;									// number of scouts when using the rush strategy
         //extern int DEFAULT_STRATEGY				= StrategyManager::ProtossAirRush;		// default strategy to use when not using fileio
         extern int DEFAULT_STRATEGY				    = StrategyManager::WorkerRushProtoss;		// default strategy to use when not using fileio
