@@ -837,7 +837,7 @@ const bool StrategyManager::doAirRush()
 {
 	int numDeadScouts = BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Scout);
 
-	if(numDeadScouts > 5)
+	if(numDeadScouts > 5 || BWAPI::Broodwar->getFrameCount() > 20000)
 	{
 		doneInitialAirRush = true;
 	}

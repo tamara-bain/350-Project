@@ -67,7 +67,7 @@ void AirHarassmentCommander::assignBaseAssault(std::set<BWAPI::Unit *> & unitsTo
 		UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 		unitsToAssign.clear();
 
-		squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::BaseAssault, enemyRegion->getCenter(), 1000, "Base Assault")));
+		squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::BaseAssault, enemyRegion->getCenter(), 1500, "Base Assault")));
 	}
 
 }
