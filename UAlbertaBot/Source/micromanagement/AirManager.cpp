@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "AirManager.h"
+#include "StrategyManager.h"
 
 AirManager::AirManager() { }
 
@@ -38,11 +39,19 @@ void AirManager::executeMicro(const UnitVector & targets)
 			// if there are no targets
 			else
 			{
+				bool baseRush = order.type == order.BaseAssault && BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Scout) < 5;
 				// if we're not near the order position
 				if (airUnit->getDistance(order.position) > 100)
 				{
 					// need to get to the base quick to maintain air superiority
-					smartMove(airUnit, order.position);
+					if(baseRush) {
+						smartMove(airUnit, order.position);
+					}
+					else 
+					{
+						smartAttackMove(airUnit, order.position);
+					}
+						
 				}
 			}
 		}
